@@ -37,6 +37,7 @@ namespace Template {
         public VPoint position = new VPoint(0, 0, 0);
         public VPoint orientation = new VPoint(0, 0, 1);
         public VPoint upperright = new VPoint(1, 1, 1);
+        public VPoint upperleft, lowerleft, lowerright;
 
         public Ray getRay(float x,float y)
         {
