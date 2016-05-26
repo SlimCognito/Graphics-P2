@@ -174,15 +174,10 @@ namespace Template {
         }
         override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
         {
-            VPoint intersection = new VPoint(0, 0, 0);
-            /*VPoint partialVector = ray.Direction * Normal;
-            if (partialVector.length == 0 )
-            {
-                return intersection.length;
-            }
-            intersection = ray.Direction * (Distance / partialVector.length);
-            intersection -= ray.Location * Normal;*/
-            return intersection.length;
+            if (Normal * ray.Direction == 0)
+                return -1;
+            else
+                return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.length);
         }
     }
     class Light
