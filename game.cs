@@ -86,13 +86,15 @@ namespace Template {
             Location = Location1;
             radius = radius1;
         }
-        public float Intersect(Ray ray)
+        public float Intersect(Ray ray) 
+            //tot zover directe copypasta van "goede manier om spheres the intersecten van de slides. iemand moet dit even uitdiepen en betere namen geven. :D
         {
-            VPoint intersection = new VPoint(0, 0, 0);
-            //IMPLEMENT INTERSECTING CIRCLE HERE.
+            VPoint c = Location - ray.Location;
+            float t = (c * ray.Direction).lenght;
+            VPoint q = c - (ray.Direction * t);
+            float p2 = (q * q).lenght;
 
-
-            return intersection.lenght;
+            return 0;
         }
     }
 
