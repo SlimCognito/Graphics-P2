@@ -55,18 +55,27 @@ namespace Template {
         public float x;
         public float y;
         public float z;
-        public float lenght;
+        public float rememberLength;
+        public float length
+        {
+            get
+            {
+                if (rememberLength == -1)
+                    rememberLength = (float)Math.Sqrt(x * x + y * y + z * z);
+                return rememberLength;
+            }
+        }
 
         public VPoint(float xinit, float yinit, float zinit)
         {
             x = xinit;
             y = yinit;
             z = zinit;
-            lenght = (float)Math.Sqrt(x* x + y * y + z* z);
+            rememberLength = -1;
         }
         public VPoint Normalize()
         {
-            return new VPoint(x/lenght, y/lenght, z/lenght);
+            return new VPoint(x/length, y/length, z/length);
         }
         public static VPoint operator *(VPoint id1, VPoint id2)     //ik heb issies met het niet normaal kunnen gebruiken van opperators.
         {
@@ -105,9 +114,9 @@ namespace Template {
             //tot zover directe copypasta van "goede manier om spheres the intersecten van de slides. iemand moet dit even uitdiepen en betere namen geven. :D
         {
             VPoint c = Location - ray.Location;
-            float t = (c * ray.Direction).lenght;
+            float t = (c * ray.Direction).length;
             VPoint q = c - (ray.Direction * t);
-            float p2 = (q * q).lenght;
+            float p2 = (q * q).length;
 
             return 0;
         }
@@ -126,13 +135,56 @@ namespace Template {
         {
             VPoint intersection = new VPoint(0, 0, 0);
             VPoint partialVector = ray.Direction * Normal;
-            if (partialVector.lenght == 0 )
+            if (partialVector.length == 0 )
             {
-                return intersection.lenght;
+                return intersection.length;
             }
-            intersection = ray.Direction * (Distance / partialVector.lenght);
+            intersection = ray.Direction * (Distance / partialVector.length);
             intersection -= ray.Location * Normal;
-            return intersection.lenght;
+            return intersection.length;
+        }
+    }
+    class Light
+    {
+        public VPoint Location;
+        public float red, green, blue;
+    }
+
+    class Scene
+    {
+        public Light[] lights;
+        public Primitive[] primitives;
+
+        public Intersection intersect(Ray ray)
+        {
+            return null;
+        }
+    }
+
+    class Intersection
+    {
+        public Ray normal;
+        public VPoint location;
+        public Primitive thingWeIntersectedWith;
+    }
+
+    class Raytracer
+    {
+        public Scene scene;
+        public Camera camera;
+        public Surface screen;
+
+        public void Render()
+        {
+            for (int x = 0; x < screen.width; x++)
+            {
+                for (int y = 0; y < screen.height; y++)
+                {
+                    Ray ray = camera.getRay(x, y);
+                    Intersection intersection = scene.intersect(ray);
+
+                }
+            }
         }
     }
 } // namespace Template
