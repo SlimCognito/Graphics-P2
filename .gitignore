@@ -47,3 +47,5 @@ Temporary Items
 .apdisk
 .vs/template/v14/.suo
 obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+obj/Debug/template.csproj.FileListAbsolute.txt
+bin/Debug/template.vshost.exe

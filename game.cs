@@ -22,14 +22,14 @@ namespace Template {
     
     public struct Ray
     {
+        public VPoint Location;
         public VPoint Direction;
         public float Distance;
-        public VPoint Location;
-        public Ray(VPoint Directioninit, VPoint Locationinit, float DistanceInit)
+        public Ray(VPoint Locationinit, VPoint Directioninit, float DistanceInit)
         {
+            Location = Locationinit;
             Direction = Directioninit;
             Distance = DistanceInit;
-            Location = Locationinit;
         }
     }
 
@@ -89,10 +89,7 @@ namespace Template {
 
     abstract class Primitive
     {
-        abstract public float Intersect
-        {
-
-        }
+        abstract public float Intersect(Ray ray);
     }
 
     class Sphere : Primitive
