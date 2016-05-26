@@ -97,7 +97,6 @@ namespace Template {
         {
             return new VPoint(a.x - b.x, a.y - b.y, a.z - b.z);
         }
-
     }
 
     abstract class Primitive
@@ -110,11 +109,11 @@ namespace Template {
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint Location1, float radius1)
+        public Sphere(VPoint location, float radius)
         {
-            Location = Location1;
-            Radius = radius1;
-            Radius2 = radius1 * radius1;
+            Location = location;
+            Radius = radius;
+            Radius2 = radius * radius;
         }
         override public float Intersect(Ray ray) 
         {
@@ -133,10 +132,10 @@ namespace Template {
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint Normal1, float Distance1)
+        public Plane(VPoint normal, float distance)
         {
-            Normal = Normal1;
-            Distance = Distance1;
+            Normal = normal;
+            Distance = distance;
         }
         override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
         {
@@ -154,13 +153,13 @@ namespace Template {
     class Light
     {
         public VPoint Location;
-        public float red, green, blue;
+        public float Red, Green, Blue;
     }
 
     class Scene
     {
-        public Light[] lights;
-        public Primitive[] primitives;
+        public Light[] Lights;
+        public Primitive[] Primitives;
 
         public Intersection intersect(Ray ray)
         {
@@ -170,9 +169,9 @@ namespace Template {
 
     class Intersection
     {
-        public Ray normal;
-        public VPoint location;
-        public Primitive thingWeIntersectedWith;
+        public Ray Normal;
+        public VPoint Location;
+        public Primitive ThingWeIntersectedWith;
     }
 
     class Raytracer
