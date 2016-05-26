@@ -53,3 +53,10 @@ bin/Debug/template.vshost.exe
 bin/Debug/template.vshost.exe
 obj/Debug/template.csproj.FileListAbsolute.txt
 obj/Debug/template.csprojResolveAssemblyReference.cache
+obj/Debug/template.pdb
+obj/Debug/template.exe
+obj/Debug/template.csproj.FileListAbsolute.txt
+bin/Debug/OpenTK.dll
+bin/Debug/template.exe
+bin/Debug/template.pdb
+obj/Debug/template.csproj.FileListAbsolute.txt

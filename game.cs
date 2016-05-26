@@ -13,7 +13,7 @@ namespace Template {
 	    public void Init()
 	    {
             Light[] lights = new Light[1];
-            lights[0] = new Light();
+            lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5);
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1);
@@ -259,18 +259,5 @@ namespace Template {
                 }
             }
         }
-        /* 
-        public int Translate(float x, bool z)
-        {
-            int result = 0;
-            if(z)
-            {
-                x -= 3;
-            }
-            x += 5;
-            x *= 51.2f;
-            result = (int)x;
-            return result;
-        }*/
     }
-} // namespace Template
+}
