@@ -5,10 +5,10 @@ namespace Template {
 
     class Game
     {
-        public Raytracer tracer;
-        bool debugging;
+        public Raytracer Tracer;
+        bool Debugging;
 	    // member variables 
-	    public Surface screen;
+	    public Surface Screen;
 	    // initialize
 	    public void Init()
 	    {
@@ -21,15 +21,15 @@ namespace Template {
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1);
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
-            tracer = new Raytracer(scene, screen);
-            debugging = true;
+            Tracer = new Raytracer(scene, Screen);
+            Debugging = true;
 	    }
 	    // tick: renders one frame
 	    public void Tick()
 	    {
-		    screen.Clear( 0 );
-		    screen.Print( "hello world", 2, 2, 0xffffff );
-            tracer.Render(debugging);
+		    Screen.Clear( 0 );
+		    Screen.Print( "hello world", 2, 2, 0xffffff );
+            Tracer.Render(Debugging);
 	    }
     }
     
@@ -56,35 +56,35 @@ namespace Template {
 
     class Camera
     {
-        public VPoint position = new VPoint(0, 0, 0);
-        public VPoint orientation = new VPoint(0, 0, 1);
-        public VPoint upperright = new VPoint(1, 1, 1);
-        public VPoint upperleft, lowerleft, lowerright;
+        public VPoint Position = new VPoint(0, 0, 0);
+        public VPoint Orientation = new VPoint(0, 0, 1);
+        public VPoint Upperright = new VPoint(1, 1, 1);
+        public VPoint upperleft, Lowerleft, Lowerright;
 
         public Ray getRay(float x,float y)
         {
             x /= 256;
             y /= 256;
             VPoint Direction = new VPoint(x -1, -(y -1), 0);
-            Direction += orientation;
+            Direction += Orientation;
             Direction = Direction.Normalize();
-            return new Ray(Direction,position,0);
+            return new Ray(Direction,Position,0);
         }
     }
 
     public struct VPoint
     {
-        public float x;
-        public float y;
-        public float z;
-        public float rememberLength;
-        public float length
+        public float X;
+        public float Y;
+        public float Z;
+        public float RememberLength;
+        public float Length
         {
             get
             {
-                if (rememberLength == -1)
-                    rememberLength = (float)Math.Sqrt(x * x + y * y + z * z);
-                return rememberLength;
+                if (RememberLength == -1)
+                    RememberLength = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+                return RememberLength;
             }
         }
 
@@ -92,41 +92,41 @@ namespace Template {
         {
             if (coordinate == "x")
             {
-                return (int)((5+x*51.2f));
+                return (int)((5+X*51.2f));
             }
-            return (int)((z + 2) * 51.2f);
+            return (int)((Z + 2) * 51.2f);
         }
 
         public VPoint(float xinit, float yinit, float zinit)
         {
-            x = xinit;
-            y = yinit;
-            z = zinit;
-            rememberLength = -1;
+            X = xinit;
+            Y = yinit;
+            Z = zinit;
+            RememberLength = -1;
         }
         public VPoint Normalize()
         {
-            return new VPoint(x/length, y/length, z/length);
+            return new VPoint(X/Length, Y/Length, Z/Length);
         }
         public static float operator *(VPoint a, VPoint b)
         {
-            return (a.x * b.x + a.y * b.y + a.z * b.z);
+            return (a.X * b.X + a.Y * b.Y + a.Z * b.Z);
         }
         public static VPoint operator *(VPoint a, float l)
         {
-            return new VPoint(a.x * l, a.y * l, a.z * l);
+            return new VPoint(a.X * l, a.Y * l, a.Z * l);
         }
         public static VPoint operator *(float l, VPoint b)
         {
-            return new VPoint(l * b.x, l * b.y, l * b.z);
+            return new VPoint(l * b.X, l * b.Y, l * b.Z);
         }
         public static VPoint operator +(VPoint a, VPoint b)
         {
-            return new VPoint(a.x + b.x, a.y + b.y, a.z + b.z);
+            return new VPoint(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
         public static VPoint operator -(VPoint a, VPoint b)
         {
-            return new VPoint(a.x - b.x, a.y - b.y, a.z - b.z);
+            return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
     }
 
@@ -178,7 +178,7 @@ namespace Template {
             }
             intersection = ray.Direction * (Distance / partialVector.length);
             intersection -= ray.Location * Normal;*/
-            return intersection.length;
+            return intersection.Length;
         }
     }
     class Light
@@ -208,52 +208,48 @@ namespace Template {
     {
         public Ray Ray;
         public Ray Normal;
-        public VPoint location;
+        public VPoint Location;
         public Primitive ThingWeIntersectedWith;
         public void debug(Surface screen)
         {
-            Ray.debug(screen, location);
+            Ray.debug(screen, Location);
             Normal.debug(screen, 1);
         }
     }
 
     class Raytracer
     {
-        public Scene scene;
-        public Camera camera;
-        public Surface screen;
+        public Scene Scene;
+        public Camera Camera;
+        public Surface Screen;
 
         public Raytracer(Scene scene, Surface screen)
         {
-            this.scene = scene;
-            this.screen = screen;
-            this.camera = new Camera();
+            this.Scene = scene;
+            this.Screen = screen;
+            this.Camera = new Camera();
         }
 
         public void Render(bool debugging)
         {
             Ray ray;
-            for (int x = 0; x < screen.width; x++)
+            for (int x = 0; x < Screen.width; x++)
             {
-                for (int y = 0; y < screen.height; y++)
+                for (int y = 0; y < Screen.height; y++)
                 {
-                    ray = camera.getRay(x, y);
-                    Intersection intersection = scene.intersect(ray);
+                    ray = Camera.getRay(x, y);
+                    Intersection intersection = Scene.intersect(ray);
 
                     if (debugging)
                     {
                         if (intersection != null)
-                            intersection.debug(screen);
+                            intersection.debug(Screen);
                         else
                             ;//smth
                     }
 
                 }
             }
-        }
-        float Dotproduct(VPoint a, VPoint b)
-        {
-            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
         /* 
         public int Translate(float x, bool z)
