@@ -50,7 +50,8 @@ namespace Template {
         }
         public void debug(Surface screen, float length)
         {
-            debug(screen, Location + Direction * length);
+            VPoint d = Direction.Normalize();
+            debug(screen, Location + d * length);
         }
     }
 
@@ -58,17 +59,22 @@ namespace Template {
     {
         public VPoint Position = new VPoint(0, 0, 0);
         public VPoint Orientation = new VPoint(0, 0, 1);
-        public VPoint Upperright = new VPoint(1, 1, 1);
-        public VPoint upperleft, Lowerleft, Lowerright;
+        public VPoint Upperleft = new VPoint(-1, 1, 1);
+        public VPoint XDirection = new VPoint(1, 0, 0);
+        public VPoint YDirection = new VPoint (0, -1, 0);
+        public VPoint upperright, Lowerleft, Lowerright;
 
         public Ray getRay(float x,float y)
         {
             x /= 256;
             y /= 256;
-            VPoint Direction = new VPoint(x -1, -(y -1), 0);
-            Direction += Orientation;
-            Direction = Direction.Normalize();
-            return new Ray(Direction,Position,0);
+            //VPoint Direction = new VPoint(x -1, -(y -1), 0);
+            //Direction += Orientation;
+            //Direction = Direction.Normalize();
+            //return new Ray(Position, Direction,0);
+            VPoint positionOnScreen = new VPoint(Upperleft.X, Upperleft.Y, Upperleft.Z);
+            positionOnScreen += x * XDirection + y * YDirection;
+            return new Ray(Position, positionOnScreen - Position, 1);
         }
     }
 
@@ -92,9 +98,9 @@ namespace Template {
         {
             if (coordinate == "x")
             {
-                return (int)((5+X*51.2f));
+                return (int)((5+X)*51.2f);
             }
-            return (int)((Z + 2) * 51.2f);
+            return 512 - (int)((Z + 2) * 51.2f);
         }
 
         public VPoint(float xinit, float yinit, float zinit)
@@ -240,12 +246,12 @@ namespace Template {
                     ray = Camera.getRay(x, y);
                     Intersection intersection = Scene.intersect(ray);
 
-                    if (debugging)
+                    if (debugging && y == 0 && x % 20 == 0)
                     {
                         if (intersection != null)
                             intersection.debug(Screen);
                         else
-                            ;//smth
+                            ray.debug(Screen, 8);//smth
                     }
 
                 }
