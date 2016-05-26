@@ -77,16 +77,24 @@ namespace Template {
 
     }
 
-    class Sphere
+    abstract class Primitive
+    {
+        abstract public float Intersect
+        {
+
+        }
+    }
+
+    class Sphere : Primitive
     {
         public VPoint Location;
-        public int radius;
-        public Sphere(VPoint Location1, int radius1)
+        public float radius;
+        public Sphere(VPoint Location1, float radius1)
         {
             Location = Location1;
             radius = radius1;
         }
-        public float Intersect(Ray ray) 
+        override public float Intersect(Ray ray) 
             //tot zover directe copypasta van "goede manier om spheres the intersecten van de slides. iemand moet dit even uitdiepen en betere namen geven. :D
         {
             VPoint c = Location - ray.Location;
@@ -98,7 +106,7 @@ namespace Template {
         }
     }
 
-    class Plane
+    class Plane : Primitive
     {
         public VPoint Normal;
         public float Distance;
@@ -107,7 +115,7 @@ namespace Template {
             Normal = Normal1;
             Distance = Distance1;
         }
-        public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
+        override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
         {
             VPoint intersection = new VPoint(0, 0, 0);
             VPoint partialVector = ray.Direction * Normal;
