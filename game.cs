@@ -63,9 +63,9 @@ namespace Template {
 
         public Ray getRay(float x,float y)
         {
-            x /= 512;
-            y /= 512;
-            VPoint Direction = new VPoint(x /= 256 -1, -(y /= 256 -1), 0);
+            x /= 256;
+            y /= 256;
+            VPoint Direction = new VPoint(x -1, -(y -1), 0);
             Direction += orientation;
             Direction = Direction.Normalize();
             return new Ray(Direction,position,0);
@@ -86,6 +86,19 @@ namespace Template {
                     rememberLength = (float)Math.Sqrt(x * x + y * y + z * z);
                 return rememberLength;
             }
+        }
+
+        public VPoint Transform()
+        {
+            VPoint Result = this;
+            Result.z -= 3;
+            Result.z += 5;
+            Result.x += 5;
+            Result.z *= 51.2f;
+            Result.x *= 51.2f;
+            Result.z = (int)Result.z;
+            Result.x = (int)Result.x;
+            return Result;
         }
 
         public VPoint(float xinit, float yinit, float zinit)
@@ -246,5 +259,18 @@ namespace Template {
         {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
+        /* 
+        public int Translate(float x, bool z)
+        {
+            int result = 0;
+            if(z)
+            {
+                x -= 3;
+            }
+            x += 5;
+            x *= 51.2f;
+            result = (int)x;
+            return result;
+        }*/
     }
 } // namespace Template
