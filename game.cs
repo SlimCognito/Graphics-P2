@@ -88,7 +88,7 @@ namespace Template {
             }
         }
 
-        public VPoint Transform()
+        public VPoint transform()
         {
             VPoint Result = this;
             Result.z -= 3;
