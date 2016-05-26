@@ -13,7 +13,7 @@ namespace Template {
 	    public void Init()
 	    {
             Light[] lights = new Light[1];
-            lights[0] = new Light();
+            lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5);
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1);
@@ -176,21 +176,25 @@ namespace Template {
         }
         override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
         {
-            VPoint intersection = new VPoint(0, 0, 0);
-            /*VPoint partialVector = ray.Direction * Normal;
-            if (partialVector.length == 0 )
-            {
-                return intersection.length;
-            }
-            intersection = ray.Direction * (Distance / partialVector.length);
-            intersection -= ray.Location * Normal;*/
-            return intersection.Length;
+            if (Normal * ray.Direction == 0)
+                return -1;
+            else
+                return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.Length);
+
         }
     }
     class Light
     {
         public VPoint Location;
         public float Red, Green, Blue;
+        
+        public Light(VPoint location, float r, float g, float b)
+        {
+            Location = location;
+            Red = r;
+            Green = g;
+            Blue = b;
+        }
     }
 
     class Scene
@@ -257,18 +261,5 @@ namespace Template {
                 }
             }
         }
-        /* 
-        public int Translate(float x, bool z)
-        {
-            int result = 0;
-            if(z)
-            {
-                x -= 3;
-            }
-            x += 5;
-            x *= 51.2f;
-            result = (int)x;
-            return result;
-        }*/
     }
-} // namespace Template
+}
