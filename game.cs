@@ -38,11 +38,11 @@ namespace Template {
         public VPoint Location;
         public VPoint Direction;
         public float Distance;
-        public Ray(VPoint Locationinit, VPoint Directioninit, float DistanceInit)
+        public Ray(VPoint Locationinit, VPoint Directioninit)
         {
             Location = Locationinit;
             Direction = Directioninit;
-            Distance = DistanceInit;
+            Distance = 20;
         }
         public void debug(Surface screen, VPoint endPoint)
         {
@@ -74,7 +74,7 @@ namespace Template {
             //return new Ray(Position, Direction,0);
             VPoint positionOnScreen = new VPoint(Upperleft.X, Upperleft.Y, Upperleft.Z);
             positionOnScreen += x * XDirection + y * YDirection;
-            return new Ray(Position, positionOnScreen - Position, 1);
+            return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
     }
 
@@ -138,6 +138,7 @@ namespace Template {
 
     abstract class Primitive
     {
+        abstract public Ray normal(VPoint location);
         abstract public float Intersect(Ray ray);
     }
 
@@ -163,6 +164,10 @@ namespace Template {
             ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
             return ray.Distance;
         }
+        public override Ray normal(VPoint location)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class Plane : Primitive
@@ -181,6 +186,10 @@ namespace Template {
             else
                 return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.Length);
 
+        }
+        public override Ray normal(VPoint location)
+        {
+            return new Ray(location, Normal);
         }
     }
     class Light
@@ -210,20 +219,38 @@ namespace Template {
 
         public Intersection intersect(Ray ray)
         {
-            return null;
+            Primitive Hit = null;
+            float j;
+            foreach(Primitive p in Primitives)
+            {
+                j = p.Intersect(ray);
+                if(j< ray.Distance&&j!=-1)
+                {
+                    ray.Distance = j;
+                    Hit = p;
+                }
+            }
+            return new Intersection(ray, ray.Location + ray.Direction*ray.Distance, Hit);
         }
     }
 
     class Intersection
     {
         public Ray Ray;
-        public Ray Normal;
         public VPoint Location;
         public Primitive ThingWeIntersectedWith;
+
+        public Intersection(Ray ray,  VPoint Location, Primitive p)
+        {
+            this.Ray = ray;
+            this.Location = Location;
+            this.ThingWeIntersectedWith = p;
+        }
+
         public void debug(Surface screen)
         {
             Ray.debug(screen, Location);
-            Normal.debug(screen, 1);
+            ThingWeIntersectedWith.normal(Location).debug(screen, 1);
         }
     }
 
