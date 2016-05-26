@@ -88,17 +88,13 @@ namespace Template {
             }
         }
 
-        public VPoint transform()
+        public int transform(string coordinate)
         {
-            VPoint Result = this;
-            Result.z -= 3;
-            Result.z += 5;
-            Result.x += 5;
-            Result.z *= 51.2f;
-            Result.x *= 51.2f;
-            Result.z = (int)Result.z;
-            Result.x = (int)Result.x;
-            return Result;
+            if (coordinate == "x")
+            {
+                return (int)((5+x*51.2f));
+            }
+            return (int)((z + 2) * 51.2f);
         }
 
         public VPoint(float xinit, float yinit, float zinit)
