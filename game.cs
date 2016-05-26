@@ -18,7 +18,6 @@ namespace Template {
 		    screen.Print( "hello world", 2, 2, 0xffffff );
 	    }
     }
-
     
     public struct Ray
     {
@@ -77,9 +76,9 @@ namespace Template {
         {
             return new VPoint(x/length, y/length, z/length);
         }
-        public static VPoint operator *(VPoint id1, VPoint id2)     //ik heb issies met het niet normaal kunnen gebruiken van opperators.
+        public static float operator *(VPoint id1, VPoint id2)
         {
-            return new VPoint(id1.x * id2.x, id1.y * id2.y, id1.z * id2.z);
+            return (id1.x * id2.x + id1.y * id2.y + id1.z * id2.z);
         }
         public static VPoint operator *(VPoint id1, float id2)
         {
@@ -119,17 +118,13 @@ namespace Template {
         override public float Intersect(Ray ray) 
         {
             VPoint c = this.Location - ray.Location;
-            float t = this.Dotproduct(c, ray.Direction);
+            float t = c * ray.Direction;
             VPoint q = c - t * ray.Direction;
-            float p = this.Dotproduct(q, q);
+            float p = q * q;
             if (p > this.Radius * this.Radius2) return -1;
             t -= (float) Math.Sqrt(this.Radius2 - p);
             ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
             return ray.Distance;
-        }
-        float Dotproduct(VPoint a, VPoint b)
-        {
-            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
     }
 
@@ -145,13 +140,13 @@ namespace Template {
         override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
         {
             VPoint intersection = new VPoint(0, 0, 0);
-            VPoint partialVector = ray.Direction * Normal;
+            /*VPoint partialVector = ray.Direction * Normal;
             if (partialVector.length == 0 )
             {
                 return intersection.length;
             }
             intersection = ray.Direction * (Distance / partialVector.length);
-            intersection -= ray.Location * Normal;
+            intersection -= ray.Location * Normal;*/
             return intersection.length;
         }
     }
