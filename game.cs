@@ -62,7 +62,7 @@ namespace Template {
             x = xinit;
             y = yinit;
             z = zinit;
-            lenght = (float)Math.Sqrt(x* x + y * y + z* z);
+            lenght = (float)Math.Sqrt(x * x + y * y + z * z);
         }
         public VPoint Normalize()
         {
@@ -75,6 +75,10 @@ namespace Template {
         public static VPoint operator *(VPoint id1, float id2)
         {
             return new VPoint(id1.x * id2, id1.y * id2, id1.z * id2);
+        }
+        public static VPoint operator *(float id1, VPoint id2)
+        {
+            return new VPoint(id1 * id2.x, id1 * id2.y, id1 * id2.z);
         }
         public static VPoint operator +(VPoint id1, VPoint id2)
         {
@@ -95,21 +99,28 @@ namespace Template {
     class Sphere : Primitive
     {
         public VPoint Location;
-        public float radius;
+        public float Radius;
+        public float Radius2;
         public Sphere(VPoint Location1, float radius1)
         {
             Location = Location1;
-            radius = radius1;
+            Radius = radius1;
+            Radius2 = radius1 * radius1;
         }
         override public float Intersect(Ray ray) 
-            //tot zover directe copypasta van "goede manier om spheres the intersecten van de slides. iemand moet dit even uitdiepen en betere namen geven. :D
         {
-            VPoint c = Location - ray.Location;
-            float t = (c * ray.Direction).lenght;
-            VPoint q = c - (ray.Direction * t);
-            float p2 = (q * q).lenght;
-
-            return 0;
+            VPoint c = this.Location - ray.Location;
+            float t = this.Dotproduct(c, ray.Direction);
+            VPoint q = c - t * ray.Direction;
+            float p = this.Dotproduct(q, q);
+            if (p > this.Radius * this.Radius2) return -1;
+            t -= (float) Math.Sqrt(this.Radius2 - p);
+            ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
+            return ray.Distance;
+        }
+        float Dotproduct(VPoint a, VPoint b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
     }
 
@@ -117,7 +128,7 @@ namespace Template {
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint Normal1, int Distance1)
+        public Plane(VPoint Normal1, float Distance1)
         {
             Normal = Normal1;
             Distance = Distance1;
@@ -133,6 +144,10 @@ namespace Template {
             intersection = ray.Direction * (Distance / partialVector.lenght);
             intersection -= ray.Location * Normal;
             return intersection.lenght;
+        }
+        float Dotproduct(VPoint a, VPoint b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
     }
 } // namespace Template
