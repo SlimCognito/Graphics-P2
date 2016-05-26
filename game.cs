@@ -46,7 +46,7 @@ namespace Template {
         }
         public void debug(Surface screen, VPoint endPoint)
         {
-
+            screen.Line(Location.transform("x"), Location.transform("y"), endPoint.transform("x"), endPoint.transform("y"), 100);
         }
         public void debug(Surface screen, float length)
         {
