@@ -51,3 +51,5 @@ obj/Debug/template.csproj.FileListAbsolute.txt
 bin/Debug/template.vshost.exe
 .vs/template/v14/.suo
 bin/Debug/template.vshost.exe
+obj/Debug/template.csproj.FileListAbsolute.txt
+obj/Debug/template.csprojResolveAssemblyReference.cache
