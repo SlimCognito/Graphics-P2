@@ -1,1 +1,2 @@
 C:\Users\Slim Cognito\Documents\Visual Studio 2015\Projects\Graphics P2\bin\Debug\template.exe.config
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\bin\Debug\template.exe.config
