@@ -185,6 +185,14 @@ namespace Template {
     {
         public VPoint Location;
         public float Red, Green, Blue;
+        
+        public Light(VPoint location, float r, float g, float b)
+        {
+            Location = location;
+            Red = r;
+            Green = g;
+            Blue = b;
+        }
     }
 
     class Scene
