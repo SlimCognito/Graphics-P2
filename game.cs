@@ -173,7 +173,7 @@ namespace Template {
             if (Normal * ray.Direction == 0)
                 return -1;
             else
-                return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.length);
+                return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.Length);
 
         }
     }
