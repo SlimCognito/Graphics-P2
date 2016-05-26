@@ -76,25 +76,25 @@ namespace Template {
         {
             return new VPoint(x/length, y/length, z/length);
         }
-        public static float operator *(VPoint id1, VPoint id2)
+        public static float operator *(VPoint a, VPoint b)
         {
-            return (id1.x * id2.x + id1.y * id2.y + id1.z * id2.z);
+            return (a.x * b.x + a.y * b.y + a.z * b.z);
         }
-        public static VPoint operator *(VPoint id1, float id2)
+        public static VPoint operator *(VPoint a, float l)
         {
-            return new VPoint(id1.x * id2, id1.y * id2, id1.z * id2);
+            return new VPoint(a.x * l, a.y * l, a.z * l);
         }
-        public static VPoint operator *(float id1, VPoint id2)
+        public static VPoint operator *(float l, VPoint b)
         {
-            return new VPoint(id1 * id2.x, id1 * id2.y, id1 * id2.z);
+            return new VPoint(l * b.x, l * b.y, l * b.z);
         }
-        public static VPoint operator +(VPoint id1, VPoint id2)
+        public static VPoint operator +(VPoint a, VPoint b)
         {
-            return new VPoint(id1.x + id2.x, id1.y + id2.y, id1.z + id2.z);
+            return new VPoint(a.x + b.x, a.y + b.y, a.z + b.z);
         }
-        public static VPoint operator -(VPoint id1, VPoint id2)
+        public static VPoint operator -(VPoint a, VPoint b)
         {
-            return new VPoint(id1.x - id2.x, id1.y - id2.y, id1.z - id2.z);
+            return new VPoint(a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
     }
