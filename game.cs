@@ -5,17 +5,31 @@ namespace Template {
 
     class Game
     {
+        public Raytracer tracer;
+        bool debugging;
 	    // member variables 
 	    public Surface screen;
 	    // initialize
 	    public void Init()
 	    {
+            Light[] lights = new Light[1];
+            lights[0] = new Light();
+            Primitive[] primitives = new Primitive[4];
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5);
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1);
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1);
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1);
+            //voeg de primitives toe
+            Scene scene = new Scene(lights, primitives);
+            tracer = new Raytracer(scene, screen);
+            debugging = true;
 	    }
 	    // tick: renders one frame
 	    public void Tick()
 	    {
 		    screen.Clear( 0 );
 		    screen.Print( "hello world", 2, 2, 0xffffff );
+            tracer.Render(debugging);
 	    }
     }
     
@@ -29,6 +43,14 @@ namespace Template {
             Location = Locationinit;
             Direction = Directioninit;
             Distance = DistanceInit;
+        }
+        public void debug(Surface screen, VPoint endPoint)
+        {
+
+        }
+        public void debug(Surface screen, float length)
+        {
+            debug(screen, Location + Direction * length);
         }
     }
 
@@ -162,6 +184,12 @@ namespace Template {
         public Light[] lights;
         public Primitive[] primitives;
 
+        public Scene(Light[] lights, Primitive[] primitives)
+        {
+            this.lights = lights;
+            this.primitives = primitives;
+        }
+
         public Intersection intersect(Ray ray)
         {
             return null;
@@ -170,9 +198,15 @@ namespace Template {
 
     class Intersection
     {
+        public Ray ray;
         public Ray normal;
         public VPoint location;
         public Primitive thingWeIntersectedWith;
+        public void debug(Surface screen)
+        {
+            ray.debug(screen, location);
+            normal.debug(screen, 1);
+        }
     }
 
     class Raytracer
@@ -181,14 +215,30 @@ namespace Template {
         public Camera camera;
         public Surface screen;
 
-        public void Render()
+        public Raytracer(Scene scene, Surface screen)
         {
+            this.scene = scene;
+            this.screen = screen;
+            this.camera = new Camera();
+        }
+
+        public void Render(bool debugging)
+        {
+            Ray ray;
             for (int x = 0; x < screen.width; x++)
             {
                 for (int y = 0; y < screen.height; y++)
                 {
-                    Ray ray = camera.getRay(x, y);
+                    ray = camera.getRay(x, y);
                     Intersection intersection = scene.intersect(ray);
+
+                    if (debugging)
+                    {
+                        if (intersection != null)
+                            intersection.debug(screen);
+                        else
+                            ;//smth
+                    }
 
                 }
             }
