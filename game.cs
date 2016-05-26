@@ -33,6 +33,7 @@ namespace Template {
 	    }
     }
     
+    // Location = ray origin, Direction = ray direction and Distance = ray length
     public struct Ray
     {
         public VPoint Location;
@@ -55,6 +56,9 @@ namespace Template {
         }
     }
 
+    // Position = camera position, Orientation = camera direction, Upperleft etc = upperleft corner etc., 
+    // X-,YDirection = direction to move in when changing X/Y, eg when moving from upperleft to upperright we add to X,
+    // moving from upperleft to lowerleft means we substract from Y.
     class Camera
     {
         public VPoint Position = new VPoint(0, 0, 0);
@@ -68,16 +72,14 @@ namespace Template {
         {
             x /= 256;
             y /= 256;
-            //VPoint Direction = new VPoint(x -1, -(y -1), 0);
-            //Direction += Orientation;
-            //Direction = Direction.Normalize();
-            //return new Ray(Position, Direction,0);
             VPoint positionOnScreen = new VPoint(Upperleft.X, Upperleft.Y, Upperleft.Z);
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, positionOnScreen - Position, 1);
         }
     }
 
+    // X,Y,Z = coordinates, RememberLength = used to determine whether the lenght has been calculated yet. If not the length will be calculated.
+    // RememberLength has been implemented with the idea that we won't always need the length of the vector.
     public struct VPoint
     {
         public float X;
@@ -94,6 +96,7 @@ namespace Template {
             }
         }
 
+        // Used in debugging window, Y = 0 so doesn't have to be transformed.
         public int transform(string coordinate)
         {
             if (coordinate == "x")
@@ -110,26 +113,32 @@ namespace Template {
             Z = zinit;
             RememberLength = -1;
         }
+        // Normalize returns a new vector, so that if needed we still have the old vector.
         public VPoint Normalize()
         {
             return new VPoint(X/Length, Y/Length, Z/Length);
         }
+        // Dotproduct
         public static float operator *(VPoint a, VPoint b)
         {
             return (a.X * b.X + a.Y * b.Y + a.Z * b.Z);
         }
+        // Multiplication with scalar
         public static VPoint operator *(VPoint a, float l)
         {
             return new VPoint(a.X * l, a.Y * l, a.Z * l);
         }
+        // Multiplication with scalar
         public static VPoint operator *(float l, VPoint b)
         {
             return new VPoint(l * b.X, l * b.Y, l * b.Z);
         }
+        // Vector addition
         public static VPoint operator +(VPoint a, VPoint b)
         {
             return new VPoint(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
+        // Vector substraction
         public static VPoint operator -(VPoint a, VPoint b)
         {
             return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
@@ -141,6 +150,7 @@ namespace Template {
         abstract public float Intersect(Ray ray);
     }
 
+    // Radius2 = Radius^2, Location = centre of the sphere
     class Sphere : Primitive
     {
         public VPoint Location;
@@ -152,6 +162,7 @@ namespace Template {
             Radius = radius;
             Radius2 = radius * radius;
         }
+        // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
             VPoint c = this.Location - ray.Location;
@@ -165,6 +176,7 @@ namespace Template {
         }
     }
 
+    // Plane is determined by normal and distance to the origin.
     class Plane : Primitive
     {
         public VPoint Normal;
@@ -174,7 +186,7 @@ namespace Template {
             Normal = normal;
             Distance = distance;
         }
-        override public float Intersect(Ray ray)  //volgens mij werkt dit maar ik zou er gelukkig van worden als iemand dit checkt.
+        override public float Intersect(Ray ray)
         {
             if (Normal * ray.Direction == 0)
                 return -1;
@@ -183,6 +195,7 @@ namespace Template {
 
         }
     }
+    // Location = location of the light source, Red, Green and Blue determine the light intensity
     class Light
     {
         public VPoint Location;
@@ -197,6 +210,8 @@ namespace Template {
         }
     }
 
+    // A scene is a list of lights and primitives
+    // The intersection methods checks for each ray whether it intersects with a primitive
     class Scene
     {
         public Light[] Lights;
