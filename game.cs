@@ -23,9 +23,9 @@ namespace Template {
     public struct Ray
     {
         public VPoint Direction;
-        public VPoint Distance;
+        public float Distance;
         public VPoint Location;
-        public Ray(VPoint Directioninit, VPoint Locationinit, VPoint DistanceInit)
+        public Ray(VPoint Directioninit, VPoint Locationinit, float DistanceInit)
         {
             Direction = Directioninit;
             Distance = DistanceInit;
@@ -38,6 +38,16 @@ namespace Template {
         public VPoint position = new VPoint(0, 0, 0);
         public VPoint orientation = new VPoint(0, 0, 1);
         public VPoint upperright = new VPoint(1, 1, 1);
+
+        public Ray getRay(float x,float y)
+        {
+            x /= 512;
+            y /= 512;
+            VPoint Direction = new VPoint(x /= 256 -1, -(y /= 256 -1), 0);
+            Direction += orientation;
+            Direction = Direction.Normalize();
+            return new Ray(Direction,position,0);
+        }
     }
 
     public struct VPoint
