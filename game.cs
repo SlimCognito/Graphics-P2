@@ -146,16 +146,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public void Update()
         {
-            Upperleft = Upperleft;
+           /* Upperleft = Upperleft;
             Upperright = Upperright;
             Lowerleft = Lowerleft;
-            Lowerright = Lowerright;
+            Lowerright = Lowerright;*/
         }
     }
    
     abstract class Primitive
     {
+        abstract public float Color = 1;
         abstract public Ray normal(VPoint location);
+        abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
     }
 
@@ -165,11 +167,22 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint location, float radius)
+        public Sphere(VPoint location, float radius, float color)
         {
+            Color = color;
             Location = location;
             Radius = radius;
             Radius2 = radius * radius;
+        }
+        public override void debug(Surface screen)
+        {
+            float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
+            VPoint middle = Location;
+            middle.Y = 0;
+            for(int i = 0; i<=120; i++)
+            {
+                //lekker 120 keer niks doen.
+            }
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
@@ -202,10 +215,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint normal, float distance)
+        public Plane(VPoint normal, float distance, float color)
         {
+            Color = color;
             Normal = normal;
             Distance = distance;
+        }
+        public override void debug()
+        {
+            //hier doen we voorlopig niks  omdat het niet zinnig is.
         }
         override public float Intersect(Ray ray)
         {
@@ -305,7 +323,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             this.Camera = new Camera();
         }
         
-        public void Render(bool debugging) // tijdelijk y standaard op 1 gezet voor EZ debugging J.
+        public void Render(bool debugging) // tijdelijk y standaard op 0 gezet voor EZ debugging J.
         {
             Ray ray; int y = 0;
             for (int x = 0; x < Screen.width; x++)
@@ -327,6 +345,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
         }
     }
+
+    /*
+     * public void drawpixel(int x, int y, Primitive p)
+     * {
+     * screen.Line(x,y,x,y, p.Color)
+     * }
+     */
+
 
     class Application
     {
