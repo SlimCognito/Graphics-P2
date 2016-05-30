@@ -15,10 +15,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Light[] lights = new Light[1];
             lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5);
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1);
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1);
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1);
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 255000);
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 255000);
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 255000);
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000);
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
             Tracer = new Raytracer(scene, Screen);
@@ -125,15 +125,43 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     // Position = camera position, Orientation = camera direction, Upperleft etc = upperleft corner etc., 
     // X-,YDirection = direction to move in when changing X/Y, eg when moving from upperleft to upperright we add to X,
-    // moving from upperleft to lowerleft means we substract from Y.
+    // moving from upperleft to lowerleft means we add to Y.
     class Camera
     {
-        public VPoint Position = new VPoint(0, 0, 0);
-        public VPoint Orientation = new VPoint(0, 0, 1);
-        public VPoint Upperleft = new VPoint(-1, 1, 1);
-        public VPoint XDirection = new VPoint(1, 0, 0);
-        public VPoint YDirection = new VPoint (0, -1, 0);
+        public VPoint Position;
+        public VPoint Orientation;
+        public VPoint Upperleft;
+        public VPoint XDirection;
+        public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
+
+        public Camera()
+        {
+            Position = new VPoint(0, 0, 0);
+            Orientation = new VPoint(0, 0, 1);
+            Upperleft = new VPoint(-1, 1, 1);
+            XDirection = new VPoint(1, 0, 0);
+            YDirection = new VPoint(0, -1, 0);
+            Upperright = new VPoint(1, 1, 1);
+            Lowerleft = new VPoint(-1, -1, 1);
+            Lowerright = new VPoint(1, -1, 1);
+        }
+
+        public void moveCamera(VPoint direction)
+        {
+            Position += direction;
+            Upperleft += direction;
+            Upperright += direction;
+            Lowerleft += direction;
+            Lowerright += direction;
+        }
+
+        public void turnCamera(VPoint direction)
+        {
+            VPoint target = Position + Orientation;
+            target += direction;
+
+        }
 
         public Ray getRay(float x,float y)
         {
@@ -146,16 +174,23 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public void Update()
         {
-            Upperleft = Upperleft;
+            /*Upperleft = Upperleft;
             Upperright = Upperright;
             Lowerleft = Lowerleft;
-            Lowerright = Lowerright;
+            Lowerright = Lowerright;*/
+        }
+
+        public void debug(Surface screen)
+        {
+            screen.Line(Upperleft.transform("x"), Upperleft.transform("y"), Upperright.transform("x"), Upperright.transform("y"), 255255255);
         }
     }
    
     abstract class Primitive
     {
+        public float Color = 1;
         abstract public Ray normal(VPoint location);
+        abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
     }
 
@@ -165,11 +200,22 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint location, float radius)
+        public Sphere(VPoint location, float radius, float color)
         {
+            Color = color;
             Location = location;
             Radius = radius;
             Radius2 = radius * radius;
+        }
+        public override void debug(Surface screen)
+        {
+            float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
+            VPoint middle = Location;
+            middle.Y = 0;
+            for(int i = 0; i<=120; i++)
+            {
+                //lekker 120 keer niks doen.
+            }
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
@@ -203,10 +249,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint normal, float distance)
+        public Plane(VPoint normal, float distance, float color)
         {
+            Color = color;
             Normal = normal;
             Distance = distance;
+        }
+        public override void debug(Surface screen)
+        {
+            //hier doen we voorlopig niks  omdat het niet zinnig is.
         }
         override public float Intersect(Ray ray)
         {
@@ -306,7 +357,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             this.Camera = new Camera();
         }
         
-        public void Render(bool debugging) // tijdelijk y standaard op 1 gezet voor EZ debugging J.
+        public void Render(bool debugging) // tijdelijk y standaard op 0 gezet voor EZ debugging J.
         {
             Ray ray; int y = 0;
             for (int x = 0; x < Screen.width; x++)
@@ -318,7 +369,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
                     if (debugging && y == 0 && x % 20 == 0)
                     {
-                        if (intersection != null)
+                        if (intersection.ThingWeIntersectedWith != null)
                             intersection.debug(Screen);
                         else
                             ray.debug(Screen, 8);//smth
@@ -326,8 +377,22 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
                // }
             }
+            if (debugging)
+            {
+                foreach (Primitive p in Scene.Primitives)
+                    //p.debug();
+                Camera.debug(Screen);
+            }
         }
     }
+
+    /*
+     * public void drawpixel(int x, int y, Primitive p)
+     * {
+     * screen.Line(x,y,x,y, p.Color)
+     * }
+     */
+
 
     class Application
     {
