@@ -213,14 +213,19 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             VPoint middle = Location;
             middle.Y = 0;
             VPoint previousTekenpunt = new VPoint((float)Math.Sin(0), 0, (float)Math.Cos(0));
+            previousTekenpunt = previousTekenpunt.Normalize();
             previousTekenpunt += middle;
-            for(int i = 1; i<120; i++)
+
+            for(double i = 1; i<121; i++)
             {
                double pii = i / 60 * Math.PI;
-               VPoint tekenpunt = new VPoint((float)Math.Sin(i), 0, (float)Math.Cos(i));
+               VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
+               tekenpunt = tekenpunt.Normalize();
                tekenpunt += middle;
                screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Color);
+               previousTekenpunt = tekenpunt;
             }
+
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
@@ -384,7 +389,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             if (debugging)
             {
                 foreach (Primitive p in Scene.Primitives)
-                    //p.debug();
+                    p.debug(Screen);
                 Camera.debug(Screen);
             }
         }
