@@ -141,7 +141,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         public void debug(Surface screen, VPoint endPoint)
         {
-            screen.Line(Location.transform("x"), Location.transform("y"), endPoint.transform("x"), endPoint.transform("y"), 100);
+            screen.Line(Location.transform("x"), Location.transform("y"), endPoint.transform("x"), endPoint.transform("y"), 0xFF0000);
         }
         public void debug(Surface screen, float length)
         {
@@ -215,7 +215,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             x /= 256;
             y /= 256;
-            VPoint positionOnScreen = new VPoint(Upperleft.X, Upperleft.Y, Upperleft.Z);
+            VPoint positionOnScreen = Upperleft;
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
@@ -335,6 +335,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Green = g;
             Blue = b;
         }
+
+        public int reflectedColor(int colorOfObject)
+        {
+            
+        }
     }
 
     // A scene is a list of lights and primitives
@@ -373,18 +378,33 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Ray Ray;
         public VPoint Location;
         public Primitive ThingWeIntersectedWith;
+        public float distance;
 
         public Intersection(Ray ray,  VPoint Location, Primitive p)
         {
+            this.distance = (Location - ray.Location).Length;
             this.Ray = ray;
             this.Location = Location;
             this.ThingWeIntersectedWith = p;
         }
 
-        public int color()
+        public int color(Scene scene)
         {
             if (ThingWeIntersectedWith != null)
-                return ThingWeIntersectedWith.Mat.GetColor(Location);
+            {
+                float result = 0;
+                foreach (Light light in scene.Lights)
+                {
+                    VPoint shadowRayDirection = (light.Location - Location);
+                    Ray shadowRay = new Ray(Location + float.Epsilon * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
+                    float distance = scene.intersect(shadowRay).distance;
+                    if (distance < (light.Location - Location).Length - 2 * float.Epsilon)
+                    {
+                        result += ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)) * light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location));
+                    }
+                }
+                return (int)result;
+            }
             return 0;
         }
 
@@ -423,7 +443,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     ray = Camera.getRay(x, y);
                     Intersection intersection = Scene.intersect(ray);
 
-                    Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color();
+                    Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene);
 
                     if (debugging && y == 256 && x % 20 == 0)
                     {
