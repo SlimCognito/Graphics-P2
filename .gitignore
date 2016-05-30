@@ -58,3 +58,7 @@ obj/Debug/template.pdb
 *.exe
 *.pdb
 *.cache
+*.exe
+bin/Debug/template.pdb
+*.exe
+*.suo
