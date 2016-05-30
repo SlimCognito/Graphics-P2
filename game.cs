@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren.
+namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren. J.
 
     class Game
     {
@@ -183,7 +183,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
             return ray.Distance;
         }
-        public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten
+        public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
+                                                    //dedichtstbijzijnde intersectie buiten hebben. J.
         {
             VPoint centre = Location;
             throw new NotImplementedException();
@@ -259,7 +260,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
     }
 
-    class Intersection // Intersections opslaan in een linkedlist en vervolgens de lijst langslopen?
+    class Intersection // Intersections opslaan in een linkedlist en vervolgens de lijst langslopen? wat voegt dit toe? we hebben toch maar een intersetion, de dichtbijste? J.
     {
         public LinkedList Intersections = new LinkedList();
         public Ray Ray;
@@ -273,7 +274,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             this.ThingWeIntersectedWith = p;
         }
 
-        public void debug(Surface screen) //ik mis even wat hier gebeurt
+        public void debug(Surface screen) //ik mis even wat hier gebeurt J.
         {
             Ray.debug(screen, Location);
             if(ThingWeIntersectedWith != null)
@@ -298,7 +299,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             this.Camera = new Camera();
         }
         
-        public void Render(bool debugging) // tijdelijk y standaard op 1 gezet voor EZ debugging
+        public void Render(bool debugging) // tijdelijk y standaard op 1 gezet voor EZ debugging J.
         {
             Ray ray; int y = 0;
             for (int x = 0; x < Screen.width; x++)
