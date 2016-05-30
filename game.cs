@@ -18,7 +18,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 255000);
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 255000);
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 255000);
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000);
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000000);
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
             Tracer = new Raytracer(scene, Screen);
@@ -109,8 +109,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Ray(VPoint Locationinit, VPoint Directioninit)
         {
             Location = Locationinit;
-            Direction = Directioninit;
-            Distance = 20;
+            Direction = Directioninit.Normalize();
+            Distance = float.PositiveInfinity;
         }
         public void debug(Surface screen, VPoint endPoint)
         {
@@ -134,11 +134,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint XDirection;
         public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
+        public VPoint target;
+        
 
         public Camera()
         {
             Position = new VPoint(0, 0, 0);
             Orientation = new VPoint(0, 0, 1);
+            target = Position + Orientation;
             Upperleft = new VPoint(-1, 1, 1);
             XDirection = new VPoint(1, 0, 0);
             YDirection = new VPoint(0, -1, 0);
@@ -154,13 +157,31 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Upperright += direction;
             Lowerleft += direction;
             Lowerright += direction;
+            target += direction;
+            setXDirection();
+            setYDirection();
+            Upperleft = target - XDirection - YDirection;
+            Upperright = target + XDirection - YDirection;
+            Lowerleft = target - XDirection + YDirection;
+            Lowerright = target + XDirection - YDirection;
+        }
+
+        private void setXDirection()
+        {
+
+        }
+        private void setYDirection()
+        {
+
         }
 
         public void turnCamera(VPoint direction)
         {
-            VPoint target = Position + Orientation;
+            target = Position + Orientation;
             target += direction;
-
+            Orientation = target - Position;
+            Orientation = Orientation.Normalize();
+            
         }
 
         public Ray getRay(float x,float y)
@@ -188,7 +209,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
    
     abstract class Primitive
     {
-        public float Color = 1;
+        public int Color = 1;
         abstract public Ray normal(VPoint location);
         abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
@@ -200,7 +221,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint location, float radius, float color)
+        public Sphere(VPoint location, float radius, int color)
         {
             Color = color;
             Location = location;
@@ -212,28 +233,31 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
             VPoint middle = Location;
             middle.Y = 0;
-            for(int i = 0; i<=120; i++)
+            VPoint previousTekenpunt = new VPoint((float)Math.Sin(0), 0, (float)Math.Cos(0));
+            previousTekenpunt = previousTekenpunt.Normalize()*Radius;
+            previousTekenpunt += middle;
+
+            for(double i = 1; i<121; i++)
             {
-                //lekker 120 keer niks doen.
+               double pii = i / 60 * Math.PI;
+               VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
+               tekenpunt = tekenpunt.Normalize()*Radius;
+               tekenpunt += middle;
+               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Color);
+               previousTekenpunt = tekenpunt;
             }
+
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
             VPoint c = Location - ray.Location;
             float t = c * ray.Direction;
-            if (t < 0) return -1;
-            float d = t * t - c * c;
-            if (d > Radius2) return -1;
-            float tc = (float)Math.Sqrt(Radius2 - d);
-            float intersect = t - tc;
-            return intersect;
             VPoint q = c - t * ray.Direction;
             float p = q * q;
-            if (p > Radius * Radius2) return -1;
+            if (p > Radius2) return -1;
             t -= (float) Math.Sqrt(Radius2 - p);
-            ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
-            return ray.Distance;
+            return t;
         }
         public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
@@ -249,7 +273,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint normal, float distance, float color)
+        public Plane(VPoint normal, float distance, int color)
         {
             Color = color;
             Normal = normal;
@@ -308,7 +332,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             foreach(Primitive p in Primitives)
             {
                 j = p.Intersect(ray);
-                if(j< ray.Distance&&j>0)
+                if(j < ray.Distance && j > 0)
                 {
                     ray.Distance = j;
                     Hit = p;
@@ -332,12 +356,19 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             this.ThingWeIntersectedWith = p;
         }
 
-        public void debug(Surface screen) //ik mis even wat hier gebeurt J.
+        public int color()
+        {
+            if (ThingWeIntersectedWith != null)
+                return ThingWeIntersectedWith.Color;
+            return 0;
+        }
+
+        public void debug(Surface screen) 
         {
             Ray.debug(screen, Location);
             if(ThingWeIntersectedWith != null)
-                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
-            else
+                //ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+            //else
             {
 
             }
@@ -359,29 +390,30 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         
         public void Render(bool debugging) // tijdelijk y standaard op 0 gezet voor EZ debugging J.
         {
-            Ray ray; int y = 0;
-            for (int x = 0; x < Screen.width; x++)
+            Ray ray;
+            for (int y = 0; y < Screen.height; y++)
             {
-                //for (int y = 0; y < Screen.height; y++)
-                //{
+                for (int x = 0; x < Screen.width / 2; x++)
+                {
                     ray = Camera.getRay(x, y);
                     Intersection intersection = Scene.intersect(ray);
 
-                    if (debugging && y == 0 && x % 20 == 0)
+                    Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color();
+
+                    if (debugging && y == 256 && x % 20 == 0)
                     {
                         if (intersection.ThingWeIntersectedWith != null)
                             intersection.debug(Screen);
                         else
-                            ray.debug(Screen, 8);//smth
+                            ray.debug(Screen, 7);//smth
                     }
-
-               // }
-            }
-            if (debugging)
-            {
-                foreach (Primitive p in Scene.Primitives)
-                    //p.debug();
-                Camera.debug(Screen);
+                }
+                if (debugging)
+                {
+                    foreach (Primitive p in Scene.Primitives)
+                        p.debug(Screen);
+                    Camera.debug(Screen);
+                }
             }
         }
     }

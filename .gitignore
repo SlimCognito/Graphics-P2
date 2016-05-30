@@ -63,3 +63,6 @@ bin/Debug/template.pdb
 *.exe
 *.suo
 template.v12.suo
+*.exe
+bin/Debug/template.pdb
+*.pdb
