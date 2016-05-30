@@ -15,10 +15,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Light[] lights = new Light[1];
             lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 0xFF00FF);
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 0xFF0000);
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 0x00FF00);
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 0x0000FF);
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material(-1));
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, true));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00,true));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF,true));
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
             Tracer = new Raytracer(scene, Screen);
@@ -31,6 +31,33 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 		    Screen.Print( "Ray Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
 	    }
+    }
+
+    public struct Material
+    {
+        public bool Reflects;
+        int Color;
+        public int GetColor(VPoint p)
+        {
+            if (Color > 0)
+                return Color;
+            else
+            {
+                return (((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) * 0xffffff;
+            }
+        }
+
+        public Material(int c)
+        {
+            Color = c;
+            Reflects = false;
+        }
+
+        public Material(int c, bool r)
+        {
+            Color = c;
+            Reflects = r;
+        }
     }
 
     // X,Y,Z = coordinates, RememberLength = used to determine whether the lenght has been calculated yet. If not the length will be calculated.
@@ -209,7 +236,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
    
     abstract class Primitive
     {
-        public int Color = 1;
+        public Material Mat;
         abstract public Ray normal(VPoint location);
         abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
@@ -221,9 +248,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint location, float radius, int color)
+        public Sphere(VPoint location, float radius, Material mat)
         {
-            Color = color;
+            Mat = mat;
             Location = location;
             Radius = radius;
             Radius2 = radius * radius;
@@ -243,7 +270,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
                tekenpunt = tekenpunt.Normalize()*Radius;
                tekenpunt += middle;
-               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Color);
+               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)));
                previousTekenpunt = tekenpunt;
             }
 
@@ -271,9 +298,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint normal, float distance, int color)
+        public Plane(VPoint normal, float distance, Material mat)
         {
-            Color = color;
+            Mat = mat;
             Normal = normal;
             Distance = distance;
         }
@@ -357,7 +384,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public int color()
         {
             if (ThingWeIntersectedWith != null)
-                return ThingWeIntersectedWith.Color;
+                return ThingWeIntersectedWith.Mat.GetColor(Location);
             return 0;
         }
 
