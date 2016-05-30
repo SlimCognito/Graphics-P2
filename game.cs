@@ -125,15 +125,43 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     // Position = camera position, Orientation = camera direction, Upperleft etc = upperleft corner etc., 
     // X-,YDirection = direction to move in when changing X/Y, eg when moving from upperleft to upperright we add to X,
-    // moving from upperleft to lowerleft means we substract from Y.
+    // moving from upperleft to lowerleft means we add to Y.
     class Camera
     {
-        public VPoint Position = new VPoint(0, 0, 0);
-        public VPoint Orientation = new VPoint(0, 0, 1);
-        public VPoint Upperleft = new VPoint(-1, 1, 1);
-        public VPoint XDirection = new VPoint(1, 0, 0);
-        public VPoint YDirection = new VPoint (0, -1, 0);
+        public VPoint Position;
+        public VPoint Orientation;
+        public VPoint Upperleft;
+        public VPoint XDirection;
+        public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
+
+        public Camera()
+        {
+            Position = new VPoint(0, 0, 0);
+            Orientation = new VPoint(0, 0, 1);
+            Upperleft = new VPoint(-1, 1, 1);
+            XDirection = new VPoint(1, 0, 0);
+            YDirection = new VPoint(0, -1, 0);
+            Upperright = new VPoint(1, 1, 1),
+            Lowerleft = new VPoint(-1, -1, 1);
+            Lowerright = new VPoint(1, -1, 1);
+        }
+
+        public void moveCamera(VPoint direction)
+        {
+            Position += direction;
+            Upperleft += direction;
+            Upperright += direction;
+            Lowerleft += direction;
+            Lowerright += direction;
+        }
+
+        public void turnCamera(VPoint direction)
+        {
+            VPoint target = Position + Orientation;
+            target += direction;
+
+        }
 
         public Ray getRay(float x,float y)
         {
@@ -146,10 +174,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public void Update()
         {
-            Upperleft = Upperleft;
+            /*Upperleft = Upperleft;
             Upperright = Upperright;
             Lowerleft = Lowerleft;
-            Lowerright = Lowerright;
+            Lowerright = Lowerright;*/
+        }
+
+        public void debug(Surface screen)
+        {
+            screen.Line(Upperleft.transform("x"), Upperleft.transform("y"), Upperright.transform("x"), Upperright.transform("y"), 255255255);
         }
     }
    
@@ -311,13 +344,19 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
                     if (debugging && y == 0 && x % 20 == 0)
                     {
-                        if (intersection != null)
+                        if (intersection.ThingWeIntersectedWith != null)
                             intersection.debug(Screen);
                         else
                             ray.debug(Screen, 8);//smth
                     }
 
                // }
+            }
+            if (debugging)
+            {
+                foreach (Primitive p in Scene.Primitives)
+                    //p.debug();
+                Camera.debug(Screen);
             }
         }
     }

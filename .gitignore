@@ -55,3 +55,6 @@ obj/Debug/template.pdb
 *.exe
 obj/Debug/template.pdb
 *.pdb
+*.exe
+*.pdb
+*.cache
