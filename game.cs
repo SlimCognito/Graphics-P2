@@ -134,11 +134,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint XDirection;
         public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
+        public VPoint target;
+        
 
         public Camera()
         {
             Position = new VPoint(0, 0, 0);
             Orientation = new VPoint(0, 0, 1);
+            target = Position += Orientation;
             Upperleft = new VPoint(-1, 1, 1);
             XDirection = new VPoint(1, 0, 0);
             YDirection = new VPoint(0, -1, 0);
@@ -154,13 +157,31 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Upperright += direction;
             Lowerleft += direction;
             Lowerright += direction;
+            target += direction;
+            setXDirection();
+            setYDirection();
+            Upperleft = target - XDirection - YDirection;
+            Upperright = target + XDirection - YDirection;
+            Lowerleft = target - XDirection + YDirection;
+            Lowerright = target + XDirection - YDirection;
+        }
+
+        private void setXDirection()
+        {
+
+        }
+        private void setYDirection()
+        {
+
         }
 
         public void turnCamera(VPoint direction)
         {
-            VPoint target = Position + Orientation;
+            target = Position + Orientation;
             target += direction;
-
+            Orientation = target - Position;
+            Orientation = Orientation.Normalize();
+            
         }
 
         public Ray getRay(float x,float y)
