@@ -17,8 +17,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 255000);
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 255000);
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 255000);
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000);
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 255255000);
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000000);
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
             Tracer = new Raytracer(scene, Screen);
@@ -188,7 +188,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
    
     abstract class Primitive
     {
-        public float Color = 1;
+        public int Color = 1;
         abstract public Ray normal(VPoint location);
         abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
@@ -200,7 +200,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public float Radius;
         public float Radius2;
-        public Sphere(VPoint location, float radius, float color)
+        public Sphere(VPoint location, float radius, int color)
         {
             Color = color;
             Location = location;
@@ -212,9 +212,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
             VPoint middle = Location;
             middle.Y = 0;
-            for(int i = 0; i<=120; i++)
+            VPoint previousTekenpunt = new VPoint((float)Math.Sin(0), 0, (float)Math.Cos(0));
+            previousTekenpunt += middle;
+            for(int i = 1; i<120; i++)
             {
-                //lekker 120 keer niks doen.
+               double pii = i / 60 * Math.PI;
+               VPoint tekenpunt = new VPoint((float)Math.Sin(i), 0, (float)Math.Cos(i));
+               tekenpunt += middle;
+               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Color);
             }
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
@@ -248,7 +253,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float Distance;
-        public Plane(VPoint normal, float distance, float color)
+        public Plane(VPoint normal, float distance, int color)
         {
             Color = color;
             Normal = normal;
@@ -335,8 +340,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Ray.debug(screen, Location);
             if(ThingWeIntersectedWith != null)
-                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
-            else
+                //ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+            //else
             {
 
             }
