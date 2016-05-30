@@ -338,7 +338,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public int reflectedColor(int colorOfObject)
         {
-            
+            return 0;
         }
     }
 
