@@ -15,10 +15,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Light[] lights = new Light[1];
             lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 255000);
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 255000);
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 255000);
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 255000000);
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, 0xFF00FF);
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, 0xFF0000);
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, 0x00FF00);
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, 0x0000FF);
             //voeg de primitives toe
             Scene scene = new Scene(lights, primitives);
             Tracer = new Raytracer(scene, Screen);
@@ -262,8 +262,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
         {
-            VPoint centre = Location;
-            throw new NotImplementedException();
+            return new Ray(location, (location - Location).Normalize());
         }
     }
 
@@ -366,8 +365,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Ray.debug(screen, Location);
             if(ThingWeIntersectedWith != null)
-                //ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
-            //else
+                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+            else
             {
 
             }
