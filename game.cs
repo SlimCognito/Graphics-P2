@@ -32,7 +32,74 @@ namespace Template {
             Tracer.Render(Debugging);
 	    }
     }
-    
+
+    // X,Y,Z = coordinates, RememberLength = used to determine whether the lenght has been calculated yet. If not the length will be calculated.
+    // RememberLength has been implemented with the idea that we won't always need the length of the vector.
+    public struct VPoint
+    {
+        public float X;
+        public float Y;
+        public float Z;
+        public float RememberLength;
+        public float Length
+        {
+            get
+            {
+                if (RememberLength == -1)
+                    RememberLength = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+                return RememberLength;
+            }
+        }
+
+        // Used in debugging window, Y = 0 so doesn't have to be transformed.
+        public int transform(string coordinate)
+        {
+            if (coordinate == "x")
+            {
+                return (int)((5 + X) * 51.2f);
+            }
+            return 512 - (int)((Z + 2) * 51.2f);
+        }
+
+        public VPoint(float xinit, float yinit, float zinit)
+        {
+            X = xinit;
+            Y = yinit;
+            Z = zinit;
+            RememberLength = -1;
+        }
+        // Normalize returns a new vector, so that if needed we still have the old vector.
+        public VPoint Normalize()
+        {
+            return new VPoint(X / Length, Y / Length, Z / Length);
+        }
+        // Dotproduct
+        public static float operator *(VPoint a, VPoint b)
+        {
+            return (a.X * b.X + a.Y * b.Y + a.Z * b.Z);
+        }
+        // Multiplication with scalar
+        public static VPoint operator *(VPoint a, float l)
+        {
+            return new VPoint(a.X * l, a.Y * l, a.Z * l);
+        }
+        // Multiplication with scalar
+        public static VPoint operator *(float l, VPoint b)
+        {
+            return new VPoint(l * b.X, l * b.Y, l * b.Z);
+        }
+        // Vector addition
+        public static VPoint operator +(VPoint a, VPoint b)
+        {
+            return new VPoint(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        }
+        // Vector substraction
+        public static VPoint operator -(VPoint a, VPoint b)
+        {
+            return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+    }
+
     // Location = ray origin, Direction = ray direction and Distance = ray length
     public struct Ray
     {
@@ -66,7 +133,7 @@ namespace Template {
         public VPoint Upperleft = new VPoint(-1, 1, 1);
         public VPoint XDirection = new VPoint(1, 0, 0);
         public VPoint YDirection = new VPoint (0, -1, 0);
-        public VPoint upperright, Lowerleft, Lowerright;
+        public VPoint Upperright, Lowerleft, Lowerright;
 
         public Ray getRay(float x,float y)
         {
@@ -76,79 +143,20 @@ namespace Template {
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-    }
 
-    // X,Y,Z = coordinates, RememberLength = used to determine whether the lenght has been calculated yet. If not the length will be calculated.
-    // RememberLength has been implemented with the idea that we won't always need the length of the vector.
-    public struct VPoint
-    {
-        public float X;
-        public float Y;
-        public float Z;
-        public float RememberLength;
-        public float Length
+        public void Update()
         {
-            get
-            {
-                if (RememberLength == -1)
-                    RememberLength = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
-                return RememberLength;
-            }
-        }
-
-        // Used in debugging window, Y = 0 so doesn't have to be transformed.
-        public int transform(string coordinate)
-        {
-            if (coordinate == "x")
-            {
-                return (int)((5+X)*51.2f);
-            }
-            return 512 - (int)((Z + 2) * 51.2f);
-        }
-
-        public VPoint(float xinit, float yinit, float zinit)
-        {
-            X = xinit;
-            Y = yinit;
-            Z = zinit;
-            RememberLength = -1;
-        }
-        // Normalize returns a new vector, so that if needed we still have the old vector.
-        public VPoint Normalize()
-        {
-            return new VPoint(X/Length, Y/Length, Z/Length);
-        }
-        // Dotproduct
-        public static float operator *(VPoint a, VPoint b)
-        {
-            return (a.X * b.X + a.Y * b.Y + a.Z * b.Z);
-        }
-        // Multiplication with scalar
-        public static VPoint operator *(VPoint a, float l)
-        {
-            return new VPoint(a.X * l, a.Y * l, a.Z * l);
-        }
-        // Multiplication with scalar
-        public static VPoint operator *(float l, VPoint b)
-        {
-            return new VPoint(l * b.X, l * b.Y, l * b.Z);
-        }
-        // Vector addition
-        public static VPoint operator +(VPoint a, VPoint b)
-        {
-            return new VPoint(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-        }
-        // Vector substraction
-        public static VPoint operator -(VPoint a, VPoint b)
-        {
-            return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            Upperleft = Upperleft;
+            Upperright = Upperright;
+            Lowerleft = Lowerleft;
+            Lowerright = Lowerright;
         }
     }
-
+   
     abstract class Primitive
     {
         abstract public Ray normal(VPoint location);
-        abstract public float Intersect(Ray ray);
+        abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
     }
 
     // Radius2 = Radius^2, Location = centre of the sphere
@@ -175,8 +183,9 @@ namespace Template {
             ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
             return ray.Distance;
         }
-        public override Ray normal(VPoint location)
+        public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten
         {
+            VPoint centre = Location;
             throw new NotImplementedException();
         }
     }
@@ -204,6 +213,7 @@ namespace Template {
             return new Ray(location, Normal);
         }
     }
+
     // Location = location of the light source, Red, Green and Blue determine the light intensity
     class Light
     {
@@ -249,8 +259,9 @@ namespace Template {
         }
     }
 
-    class Intersection
+    class Intersection // Intersections opslaan in een linkedlist en vervolgens de lijst langslopen?
     {
+        public LinkedList Intersections = new LinkedList();
         public Ray Ray;
         public VPoint Location;
         public Primitive ThingWeIntersectedWith;
@@ -300,6 +311,69 @@ namespace Template {
                             ray.debug(Screen, 8);//smth
                     }
 
+                }
+            }
+        }
+    }
+
+    class Application
+    {
+        
+    }
+
+    public class LinkedList
+    {
+        public class Node
+        {
+            public Node next = null;
+            public object data;
+        }
+
+        private Node root = null;
+        
+        public Node First { get { return root; } }
+
+        public Node Last
+        {
+            get
+            {
+                Node current = root;
+                if (current == null)
+                    return null;
+                while (current.next != null)
+                    current = current.next;
+                return current;
+            }
+        }
+
+        public void Add(object value)
+        {
+            Node n = new Node { data = value };
+            if (root == null)
+                root = n;
+            else
+                Last.next = n;
+        }
+
+        public void Delete(Node n)
+        {
+            if (root == n)
+            {
+                root = n.next;
+                n.next = null;
+            }
+            else
+            {
+                Node current = root;
+                while (root.next != null)
+                {
+                    if (current.next == n)
+                    {
+                        current.next = n.next;
+                        n.next = null;
+                        break;
+                    }
+                    current = current.next;
                 }
             }
         }
