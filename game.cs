@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Template {
+namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren.
 
     class Game
     {
@@ -28,7 +28,7 @@ namespace Template {
 	    public void Tick()
 	    {
 		    Screen.Clear( 0 );
-		    Screen.Print( "hello world", 2, 2, 0xffffff );
+		    Screen.Print( "Ray Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
 	    }
     }
@@ -239,7 +239,7 @@ namespace Template {
             foreach(Primitive p in Primitives)
             {
                 j = p.Intersect(ray);
-                if(j< ray.Distance&&j!=-1)
+                if(j< ray.Distance&&j>0)
                 {
                     ray.Distance = j;
                     Hit = p;
@@ -262,10 +262,15 @@ namespace Template {
             this.ThingWeIntersectedWith = p;
         }
 
-        public void debug(Surface screen)
+        public void debug(Surface screen) //ik mis even wat hier gebeurt
         {
             Ray.debug(screen, Location);
-            ThingWeIntersectedWith.normal(Location).debug(screen, 1);
+            if(ThingWeIntersectedWith != null)
+                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+            else
+            {
+
+            }
         }
     }
 
@@ -281,14 +286,14 @@ namespace Template {
             this.Screen = screen;
             this.Camera = new Camera();
         }
-
-        public void Render(bool debugging)
+        
+        public void Render(bool debugging) // tijdelijk y standaard op 1 gezet voor EZ debugging
         {
-            Ray ray;
+            Ray ray; int y = 0;
             for (int x = 0; x < Screen.width; x++)
             {
-                for (int y = 0; y < Screen.height; y++)
-                {
+                //for (int y = 0; y < Screen.height; y++)
+                //{
                     ray = Camera.getRay(x, y);
                     Intersection intersection = Scene.intersect(ray);
 
@@ -300,7 +305,7 @@ namespace Template {
                             ray.debug(Screen, 8);//smth
                     }
 
-                }
+               // }
             }
         }
     }
