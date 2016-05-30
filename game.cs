@@ -234,14 +234,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             VPoint middle = Location;
             middle.Y = 0;
             VPoint previousTekenpunt = new VPoint((float)Math.Sin(0), 0, (float)Math.Cos(0));
-            previousTekenpunt = previousTekenpunt.Normalize();
+            previousTekenpunt = previousTekenpunt.Normalize()*Radius;
             previousTekenpunt += middle;
 
             for(double i = 1; i<121; i++)
             {
                double pii = i / 60 * Math.PI;
                VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
-               tekenpunt = tekenpunt.Normalize();
+               tekenpunt = tekenpunt.Normalize()*Radius;
                tekenpunt += middle;
                screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Color);
                previousTekenpunt = tekenpunt;
