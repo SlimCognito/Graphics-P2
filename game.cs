@@ -174,12 +174,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
-            VPoint c = this.Location - ray.Location;
+            VPoint c = Location - ray.Location;
             float t = c * ray.Direction;
+            if (t < 0) return -1;
+            float d = t * t - c * c;
+            if (d > Radius2) return -1;
+            float tc = (float)Math.Sqrt(Radius2 - d);
+            float intersect = t - tc;
+            return intersect;
             VPoint q = c - t * ray.Direction;
             float p = q * q;
-            if (p > this.Radius * this.Radius2) return -1;
-            t -= (float) Math.Sqrt(this.Radius2 - p);
+            if (p > Radius * Radius2) return -1;
+            t -= (float) Math.Sqrt(Radius2 - p);
             ray.Distance = Math.Min(ray.Distance, Math.Max(0, t));
             return ray.Distance;
         }
