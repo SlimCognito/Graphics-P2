@@ -192,8 +192,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
         {
-            VPoint centre = Location;
-            throw new NotImplementedException();
+            VPoint normal = location - Location;
+            normal.Normalize();
+            return new Ray(location, normal);
         }
     }
 
