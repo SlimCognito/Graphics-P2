@@ -323,7 +323,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Plane(VPoint normal, float distance, Material mat)
         {
             Mat = mat;
-            Normal = normal;
+            Normal = normal.Normalize();
             Distance = distance;
         }
 
