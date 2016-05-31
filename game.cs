@@ -18,9 +18,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material(-1));
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, true));
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00,true));
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF,true));
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, 0));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00, 0));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF, 0));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -39,8 +39,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     public struct Material
     {
-        public bool Reflects;
+
         public VPoint Color;
+        public float Reflects;
 
         public VPoint GetColor(VPoint p)
         {
@@ -59,10 +60,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Material(int c)
         {
             Color = c;
-            Reflects = false;
+            Reflects = 0;
         }
         // Create reflective material
-        public Material(int c, bool r)
+        public Material(int c, float r)
         {
             Color = c;
             Reflects = r;
@@ -258,8 +259,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     class Sphere : Primitive
     {
         public VPoint Location;
-        public float Radius;
-        public float Radius2;
+        public float  Radius;
+        public float  Radius2;
+
         public Sphere(VPoint location, float radius, Material mat)
         {
             Mat = mat;
@@ -341,7 +343,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     class Light
     {
         public VPoint Location;
-        public float Red, Green, Blue;
+        public float  Red, Green, Blue;
         
         public Light(VPoint location, float r, float g, float b)
         {
@@ -388,13 +390,12 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
     }
 
-    class Intersection // Intersections opslaan in een linkedlist en vervolgens de lijst langslopen? wat voegt dit toe? we hebben toch maar een intersetion, de dichtbijste? J.
+    class Intersection
     {
-        public LinkedList Intersections = new LinkedList();
-        public Ray Ray;
-        public VPoint Location;
+        public Ray       Ray;
+        public VPoint    Location;
         public Primitive ThingWeIntersectedWith;
-        public float Distance;
+        public float     Distance;
 
         public Intersection(Ray ray,  VPoint location, Primitive p)
         {
@@ -408,7 +409,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             if (ThingWeIntersectedWith != null)
             {
-                VPoint result = new VPoint(0,0,0);
+
+                VPoint result = new VPoint(0, 0, 0);
                 foreach (Light light in scene.Lights)
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
@@ -473,77 +475,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     foreach (Primitive p in Scene.Primitives)
                         p.debug(Screen);
                     Camera.debug(Screen);
-                }
-            }
-        }
-    }
-
-    /*
-     * public void drawpixel(int x, int y, Primitive p)
-     * {
-     * screen.Line(x,y,x,y, p.Color)
-     * }
-     */
-
-
-    class Application
-    {
-        
-    }
-
-    public class LinkedList
-    {
-        public class Node
-        {
-            public Node next = null;
-            public object data;
-        }
-
-        private Node root = null;
-        
-        public Node First { get { return root; } }
-
-        public Node Last
-        {
-            get
-            {
-                Node current = root;
-                if (current == null)
-                    return null;
-                while (current.next != null)
-                    current = current.next;
-                return current;
-            }
-        }
-
-        public void Add(object value)
-        {
-            Node n = new Node { data = value };
-            if (root == null)
-                root = n;
-            else
-                Last.next = n;
-        }
-
-        public void Delete(Node n)
-        {
-            if (root == n)
-            {
-                root = n.next;
-                n.next = null;
-            }
-            else
-            {
-                Node current = root;
-                while (root.next != null)
-                {
-                    if (current.next == n)
-                    {
-                        current.next = n.next;
-                        n.next = null;
-                        break;
-                    }
-                    current = current.next;
                 }
             }
         }
