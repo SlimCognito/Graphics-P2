@@ -8,6 +8,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public bool      Debugging;
         public Raytracer Tracer;
 	    public Surface   Screen;
+        public static float[] sinTable;
 
 	    // initialize
 	    public void Init()
@@ -17,7 +18,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(1f));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
@@ -27,6 +28,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Tracer = new Raytracer(scene, Screen);
             // Set debugging
             Debugging = true;
+            sinTable = new float[360];
+            for (int i = 0; i < 360; i++)
+                sinTable[i] = (float)Math.Sin(i * Math.PI / 180);
 	    }
 	    // tick: renders one frame
 	    public void Tick()
@@ -34,7 +38,28 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 		    Screen.Clear( 0 );
 		    Screen.Print( "Ray Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
-	    }
+
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.W])
+                Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.YDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.A])
+                Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.XDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.S])
+                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.YDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.D])
+                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.XDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Enter])
+                Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.YDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.LShift])
+                Tracer.Camera.moveCamera(0.1f * Tracer.Camera.YDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Left])
+                Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.XDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Right])
+                Tracer.Camera.moveCamera(0.1f * Tracer.Camera.XDirection);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Up])
+                Tracer.Camera.moveCamera(0.1f * Tracer.Camera.Orientation);
+            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Down])
+                Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.Orientation);
+        }
     }
 
     public class Material
@@ -217,20 +242,34 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         private void setXDirection()
         {
-            float dX = Orientation.X;
-            float dZ = -(dX * dX) / Orientation.Z;
-            XDirection = new VPoint(dX, 0, dZ).Normalize();
+            float dX;
+            if (Orientation.Z > 0)
+            {
+                dX = 1;
+            }
+            else if (Orientation.Z < 0)
+            {
+                dX = -1;
+            }
+            else
+            {
+                XDirection = new VPoint(0, 0, -Orientation.X).Normalize();
+                return;
+            }
+            XDirection = new VPoint(dX, 0, -Orientation.X * dX / Orientation.Z).Normalize();
+
+            
         }
         private void setYDirection()
         {
             YDirection = XDirection % Orientation;
-            if (YDirection.Y < 0)
-                YDirection *= 1;
+            if (YDirection.Y > 0)
+                YDirection *= -1;
         }
 
         public void turnCamera(VPoint direction)
         {
-            Orientation = (Target + direction - Position).Normalize();
+            Orientation = (Orientation + direction).Normalize();
             Target = Position + Orientation;
             setXDirection();
             setYDirection();
@@ -289,14 +328,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
             VPoint middle = Location;
             middle.Y = 0;
-            VPoint previousTekenpunt = new VPoint((float)Math.Sin(0), 0, (float)Math.Cos(0));
+            VPoint previousTekenpunt = new VPoint(0, 0, 1);
             previousTekenpunt = previousTekenpunt.Normalize()*Radius;
             previousTekenpunt += middle;
 
-            for(double i = 1; i<121; i++)
+            for(int i = 1; i<121; i++)
             {
-               double pii = i / 60 * Math.PI;
-               VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
+               VPoint tekenpunt = new VPoint(Game.sinTable[(i * 3) % 360], 0, Game.sinTable[(i * 3 + 90) % 360]);
                tekenpunt = tekenpunt.Normalize()*Radius;
                tekenpunt += middle;
                screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)).getColor());
@@ -436,7 +474,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 1)
                 {
                     Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
                     primaryRay.recursion = Ray.recursion + 1;
