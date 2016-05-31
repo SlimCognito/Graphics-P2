@@ -17,10 +17,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material(-1));
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, true));
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00,true));
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF,true));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(new VPoint(255, 0, 0), true));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(new VPoint(0, 255, 0), true));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(new VPoint(0, 0, 255), true));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -37,14 +37,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    }
     }
 
-    public struct Material
+    public class Material
     {
         public bool Reflects;
-        public int  Color;
+        public VPoint Color;
+        public bool texture;
 
-        public int GetColor(VPoint p)
+        public VPoint GetColor(VPoint p)
         {
-            if (Color > 0)
+            if (!texture)
                 return Color;
             else
             {
@@ -52,13 +53,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
         }
         // Create material
-        public Material(int c)
+        public Material()
         {
-            Color = c;
+            texture = true;
             Reflects = false;
         }
         // Create reflective material
-        public Material(int c, bool r)
+        public Material(VPoint c, bool r)
         {
             Color = c;
             Reflects = r;
@@ -133,7 +134,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public int getColor()
         {
-            return (int) (X * 256 * 256 + Y * 256 + Z);
+            return 1 * 256 * 256 + 0 + 0;
+            //return (int) (X * 256 * 256 + Y * 256 + Z);
         }
     }
 
@@ -276,7 +278,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
                tekenpunt = tekenpunt.Normalize()*Radius;
                tekenpunt += middle;
-               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)));
+               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)).getColor());
                previousTekenpunt = tekenpunt;
             }
 
@@ -345,10 +347,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Blue = b;
         }
 
-        public VPoint reflectedColor(int colorOfObject, float intensity)
+        public VPoint reflectedColor(VPoint colorOfObject, float intensity)
         {
-            VPoint RGB = new VPoint(colorOfObject / (256 * 256), colorOfObject / (256) % 256, (colorOfObject % 256) % 256);
-            return RGB;
+            return new VPoint(colorOfObject.X * intensity, colorOfObject.Y * intensity, colorOfObject.Z * intensity);
         }
     }
 
@@ -402,13 +403,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             if (ThingWeIntersectedWith != null)
             {
-                VPoint result = 0;
+                VPoint result = new VPoint(0, 0, 0);
                 foreach (Light light in scene.Lights)
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
-                    Ray shadowRay = new Ray(Location + float.Epsilon * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
+                    Ray shadowRay = new Ray(Location + 0.00000001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
                     float distance = scene.intersect(shadowRay).Distance;
-                    if (distance < (light.Location - Location).Length - 2 * float.Epsilon)
+                    if (distance < (light.Location - Location).Length - 2 * 0.00000001)
                     {
                         result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)));
                     }
