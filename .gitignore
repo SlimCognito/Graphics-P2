@@ -66,3 +66,6 @@ template.v12.suo
 *.exe
 bin/Debug/template.pdb
 *.pdb
+obj/Debug/template.csproj.FileListAbsolute.txt
+*.cache
+obj/Debug/template.csprojResolveAssemblyReference.cache
