@@ -231,6 +231,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public void turnCamera(VPoint direction)
         {
             Orientation = (Target + direction - Position).Normalize();
+            Target = Position + Orientation;
             setXDirection();
             setYDirection();
             Upperleft = Target - XDirection - YDirection;
@@ -247,15 +248,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-
-        public void Update()
-        {
-            /*Upperleft = Upperleft;
-            Upperright = Upperright;
-            Lowerleft = Lowerleft;
-            Lowerright = Lowerright;*/
-        }
-
+        
         public void debug(Surface screen)
         {
             screen.Line(Upperleft.transform("x"), Upperleft.transform("y"), Upperright.transform("x"), Upperright.transform("y"), 255255255);
