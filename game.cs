@@ -17,7 +17,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(1f));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
@@ -48,14 +48,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 return Color;
             else
             {
-                return new VPoint(255,255,255) * (((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2);
+                return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
             }
         }
         // Create material
-        public Material()
+        public Material(float r)
         {
             texture = true;
-            Reflects = 0;
+            Reflects = r;
         }
         // Create reflective material
         public Material(VPoint c, float r)
@@ -208,26 +208,30 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Lowerleft += direction;
             Lowerright += direction;
             Target += direction;
+        }
+
+        private void setXDirection()
+        {
+            float dX = Orientation.X;
+            float dZ = -(dX * dX) / Orientation.Z;
+            XDirection = new VPoint(dX, 0, dZ).Normalize();
+        }
+        private void setYDirection()
+        {
+            YDirection = XDirection**Orientation;
+            if (YDirection.Y < 0)
+                YDirection *= 1;
+        }
+
+        public void turnCamera(VPoint direction)
+        {
+            Orientation = (Target + direction - Position).Normalize();
             setXDirection();
             setYDirection();
             Upperleft = Target - XDirection - YDirection;
             Upperright = Target + XDirection - YDirection;
             Lowerleft = Target - XDirection + YDirection;
             Lowerright = Target + XDirection - YDirection;
-        }
-
-        private void setXDirection()
-        {
-
-        }
-        private void setYDirection()
-        {
-
-        }
-
-        public void turnCamera(VPoint direction)
-        {
-            Orientation = (Target + direction - Position).Normalize();
         }
 
         public Ray getRay(float x,float y)
@@ -264,7 +268,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             VPoint d = ray.Direction.Normalize();
             VPoint n = normal(location).Direction;
-            return new Ray(location, d - (2 * (d * n) * n));
+            return new Ray(location, (d - (2 * (d * n) * n)).Normalize());
         }
     }
 
@@ -434,7 +438,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 15)
                 {
                     Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
                     primaryRay.recursion = Ray.recursion + 1;
