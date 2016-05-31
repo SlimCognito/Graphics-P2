@@ -40,15 +40,19 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     public struct Material
     {
         public bool Reflects;
-        public int  Color;
+        public VPoint Color;
 
-        public int GetColor(VPoint p)
+        public VPoint GetColor(VPoint p)
         {
             if (Color > 0)
                 return Color;
             else
             {
-                return (((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) * 0xffffff;
+                switch (Color)
+                {
+                    case -1: return new VPoint(255,255,255) * (((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2);
+                    default: return new VPoint(0,0,0);
+                }
             }
         }
         // Create material
@@ -100,6 +104,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Z = zinit;
             RememberLength = -1;
         }
+
+
         // Normalize returns a new vector, so that if needed we still have the old vector.
         public VPoint Normalize()
         {
@@ -402,7 +408,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             if (ThingWeIntersectedWith != null)
             {
-                VPoint result = 0;
+                VPoint result = new VPoint(0,0,0);
                 foreach (Light light in scene.Lights)
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
