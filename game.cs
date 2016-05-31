@@ -303,8 +303,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         public Ray Reflect(Ray ray, VPoint location)
         {
-            Ray norm = normal(location);
-            return new Ray(norm.Location, 2 * (norm.Direction * ray.Direction) * norm.Direction - ray.Direction);
+            VPoint d = ray.Direction.Normalize();
+            VPoint n = normal(location).Direction;
+            return new Ray(location, d - (2 * (d * n) * n));
         }
 
     }
