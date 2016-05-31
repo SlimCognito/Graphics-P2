@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Drawing;
 
 namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren. J.
 
@@ -8,7 +9,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public bool      Debugging;
         public Raytracer Tracer;
 	    public Surface   Screen;
-
+        public static Bitmap    Space;
 	    // initialize
 	    public void Init()
 	    {
@@ -17,23 +18,26 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(1, 1, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[5];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
-            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f));
+            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
             Tracer = new Raytracer(scene, Screen);
             // Set debugging
             Debugging = true;
+            //load bitmap4space
+            string s = Path.Combine(Environment.CurrentDirectory, @"Data\", "Space.jpg");
+            Space = new Bitmap(s);
 	    }
 	    // tick: renders one frame
 	    public void Tick()
 	    {
 		    Screen.Clear( 0 );
-		    Screen.Print( "Ray Tracer", 2, 2, 0xffffff );
+		    Screen.Print( "Gay Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
 	    }
     }
@@ -41,21 +45,42 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     public class Material
     {
         public VPoint Color;
-        public bool texture;
+        public int texture;
         public float Reflects;
         public VPoint GetColor(VPoint p)
         {
-            if (!texture)
-                return Color;
-            else
+
+            switch(texture)
             {
-                return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
+                case 0: return Color;
+                case 1: return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
+                case 2:
+                    {
+                        int x = Modulo((int)(p.X * 600)+3000,6000);
+                        int y = Modulo((int)(p.Z * 400)+1600,4000);
+                        Color Pixel = Game.Space.GetPixel(x, y);
+                        return new VPoint(Pixel.R, Pixel.G, Pixel.B);
+                    }
+                default: return Color;
             }
+
         }
-        // Create material
-        public Material(float r)
+        //better modulo
+        int Modulo(int i, int y)
         {
-            texture = true;
+            if ((i / y) % 2 == 1)
+                i = -i;
+            while (i < 0)
+                i += y;
+            while (i >= y)
+                i -= y;
+            return i;
+        }
+
+        // Create material
+        public Material(float r, int t)
+        {
+            texture = t;
             Reflects = r;
         }
         // Create reflective material
@@ -63,7 +88,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Color = c;
             Reflects = r;
-            texture = false;
+            texture = 0;
         }
     }
 
