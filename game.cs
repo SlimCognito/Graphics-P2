@@ -18,9 +18,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 0, 0), 0));
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 0), 0.5f));
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(0, 0, 255), 0));
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -134,9 +134,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
 
+        public static VPoint colorStuff(VPoint reflectie, VPoint diffusie, float r)
+        {
+            VPoint a = diffusie * (1- r) + r * new VPoint((diffusie.X * reflectie.X) / 255, (diffusie.Y * reflectie.Y) / 255, (diffusie.Z * reflectie.Z) / 255);
+            return a;
+        }
+
         public int getColor()
         {
-            int lekkah = (int)(X * 256 * 256 + Y * 256 + Z);
+            int lekkah = (int)((int)X * 256 * 256 + (int)Y * 256 + (int)Z);
             string lekkahlekkah = lekkah.ToString("X");
             return Convert.ToInt32(lekkahlekkah, 16);
         }
@@ -434,7 +440,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     primaryRay.recursion = Ray.recursion + 1;
 
                     Intersection inter = scene.intersect(primaryRay);
-                    return inter.color(scene) * ThingWeIntersectedWith.Mat.Reflects + diffusion * (1 - ThingWeIntersectedWith.Mat.Reflects);
+                    VPoint smth = inter.color(scene);
+                    return VPoint.colorStuff(inter.color(scene), diffusion, ThingWeIntersectedWith.Mat.Reflects);
                 }
                 else
                     return diffusion;
