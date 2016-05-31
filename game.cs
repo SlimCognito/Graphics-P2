@@ -340,7 +340,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Blue = b;
         }
 
-        public int reflectedColor(int colorOfObject)
+        public int reflectedColor(int colorOfObject, float intensity)
         {
             return colorOfObject;
         }
@@ -401,13 +401,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
                     Ray shadowRay = new Ray(Location + float.Epsilon * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
-                    float distance = scene.intersect(shadowRay).Distance;
+                    int distance = scene.intersect(shadowRay).Distance;
                     if (distance < (light.Location - Location).Length - 2 * float.Epsilon)
                     {
-                        result += ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)) * light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location));
+                        result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)));
                     }
                 }
-                return (int)result;
+                return result;
             }
             return 0;
         }
@@ -448,7 +448,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     Intersection intersection = Scene.intersect(ray);
 
                     Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene);
-
                     if (debugging && y == 256 && x % 20 == 0)
                     {
                         if (intersection.ThingWeIntersectedWith != null)
