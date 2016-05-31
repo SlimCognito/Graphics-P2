@@ -2,38 +2,43 @@
 using System.IO;
 using System.Drawing;
 
-namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren. J.
-
+namespace Template { 
     class Game
     {
-        public bool      Debugging;
-        public Raytracer Tracer;
-	    public Surface   Screen;
-        public static float[] sinTable;
-        public static Bitmap    Space;
+        // Debugging tells us whether we are debugging or not
+        public bool           Debugging;
+        public static int     Recursion;
+	    public Surface        Screen;
+        public static float[] SinTable;
+        public static Bitmap  Space;
+        public Raytracer      Tracer;
 	    // initialize
 	    public void Init()
 	    {
+            // Set recursion level
+            Recursion = 5;
             // Add light(s)
             Light[] lights = new Light[2];
             lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
             lights[1] = new Light(new VPoint(2, 10, 5), 2, 2, 2);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[5];
-            primitives[4] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
-            primitives[0] = new Sphere(new VPoint(0, -5, 1), 10f, new Material(0f,2));
+            // The sphere in which the whole scene is situated
+            primitives[4] = new Sphere(new VPoint(0, -5, 1), 10f, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
             Tracer = new Raytracer(scene, Screen);
             // Set debugging
             Debugging = true;
-            sinTable = new float[360];
+            // Calculating the sinus every time you need is, is slow, as such we calculate the values once and use an array
+            SinTable = new float[360];
             for (int i = 0; i < 360; i++)
-                sinTable[i] = (float)Math.Sin(i * Math.PI / 180);
+                SinTable[i] = (float)Math.Sin(i * Math.PI / 180);
             //load bitmap4space
             string s = Path.Combine(Environment.CurrentDirectory, @"Data\", "Space.jpg");
             Space = new Bitmap(s);
@@ -41,54 +46,42 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    // tick: renders one frame
 	    public void Tick()
 	    {
-		    Screen.Clear( 0 );
-		    Screen.Print( "Tracer", 2, 2, 0xffffff );
-            Tracer.Render(Debugging);
-
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.W])
-            {
-                Debugging = false;
+            // Handle keyboard input. Arrow keys move the camera, WASD is used for turning the camera, LShift and Enter move the camera up and down
+            var keyboard = OpenTK.Input.Keyboard.GetState();
+            if (keyboard[OpenTK.Input.Key.W])
                 Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.YDirection);
-            }
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.A])
-            {
-                Debugging = false;
+            if (keyboard[OpenTK.Input.Key.A])
                 Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.XDirection);
-            }
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.S])
-            {
-                    Debugging = false;
-                    Tracer.Camera.turnCamera(0.1f * Tracer.Camera.YDirection);
-            }
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.D])
-            {
-                        Debugging = false;
-                        Tracer.Camera.turnCamera(0.1f * Tracer.Camera.XDirection);
-            }
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Enter])
+            if (keyboard[OpenTK.Input.Key.S])
+                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.YDirection);
+            if (keyboard[OpenTK.Input.Key.D])
+                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.XDirection);
+            if (keyboard[OpenTK.Input.Key.Enter])
                 Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.YDirection);
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.LShift])
+            if (keyboard[OpenTK.Input.Key.LShift])
                 Tracer.Camera.moveCamera(0.1f * Tracer.Camera.YDirection);
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Left])
+            if (keyboard[OpenTK.Input.Key.Left])
                 Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.XDirection);
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Right])
+            if (keyboard[OpenTK.Input.Key.Right])
                 Tracer.Camera.moveCamera(0.1f * Tracer.Camera.XDirection);
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Up])
+            if (keyboard[OpenTK.Input.Key.Up])
                 Tracer.Camera.moveCamera(0.1f * Tracer.Camera.Orientation);
-            if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Down])
+            if (keyboard[OpenTK.Input.Key.Down])
                 Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.Orientation);
+            Screen.Clear(0);
+            Screen.Print("Tracer", 2, 2, 0xffffff);
+            Tracer.Render(Debugging);
         }
     }
 
     public class Material
     {
         public VPoint Color;
-        public int texture;
-        public float Reflects;
+        public int    Texture;
+        public float  Reflects;
         public VPoint GetColor(VPoint p)
         {
-
-            switch(texture)
+            switch(Texture)
             {
                 case 0: return Color;
                 case 1: return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
@@ -101,7 +94,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 default: return Color;
             }
-
         }
         //better modulo
         int Modulo(int i, int y)
@@ -114,11 +106,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 i -= y;
             return i;
         }
-
         // Create material
         public Material(float r, int t)
         {
-            texture = t;
+            Texture = t;
             Reflects = r;
         }
         // Create reflective material
@@ -126,12 +117,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Color = c;
             Reflects = r;
-            texture = 0;
+            Texture = 0;
         }
     }
 
     // X,Y,Z = coordinates, RememberLength = used to determine whether the lenght has been calculated yet. If not the length will be calculated.
-    // RememberLength has been implemented with the idea that we won't always need the length of the vector.
+    // RememberLength has been implemented with the idea that we won't always need the length of the vector, especially since a VPoint is also
+    // used to store colors (as (R, G, B)).
     public struct VPoint
     {
         public float X;
@@ -147,7 +139,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 return RememberLength;
             }
         }
-
         // Used in debugging window, if the string != "x" it transforms to the Y-coordinate on your screen.
         public int transform(string coordinate)
         {
@@ -157,7 +148,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
             return 512 - (int)((Z + 2) * 51.2f);
         }
-        // 3D vector / point in 3D space
+        // 3D vector / point in 3D space / Color in R, G, B values
         public VPoint(float xinit, float yinit, float zinit)
         {
             X = xinit;
@@ -165,8 +156,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Z = zinit;
             RememberLength = -1;
         }
-
-
         // Normalize returns a new vector, so that if needed we still have the old vector.
         public VPoint Normalize()
         {
@@ -202,18 +191,17 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
-
-        public static VPoint colorStuff(VPoint reflectie, VPoint diffusie, float r)
+        // Determine the color based on reflection and diffusion
+        public static VPoint colorStuff(VPoint reflection, VPoint diffusion, float r)
         {
-            VPoint a = diffusie * (1- r) + r * new VPoint((diffusie.X * reflectie.X) / 255, (diffusie.Y * reflectie.Y) / 255, (diffusie.Z * reflectie.Z) / 255);
-            return a;
+            return (diffusion * (1- r) + r * new VPoint((diffusion.X * reflection.X) / 255, (diffusion.Y * reflection.Y) / 255, (diffusion.Z * reflection.Z) / 255));
         }
-
+        // Get a color based on the R, G, B values
         public int getColor()
         {
-            int lekkah = (int)((int)X * 256 * 256 + (int)Y * 256 + (int)Z);
-            string lekkahlekkah = lekkah.ToString("X");
-            return Convert.ToInt32(lekkahlekkah, 16);
+            int color = (int)((int)X * 256 * 256 + (int)Y * 256 + (int)Z);
+            string scolor = color.ToString("X");
+            return Convert.ToInt32(scolor, 16);
         }
     }
 
@@ -224,7 +212,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Direction;
         public float  Distance;
         public int recursion;
-
+        // Create ray
         public Ray(VPoint Locationinit, VPoint Directioninit)
         {
             Location = Locationinit;
@@ -253,6 +241,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     color = 0x888800;
                     break;
             }
+            // Make sure that the debug output isn't drawn in the scene (in other words, limit the x value to 512, if it exceeds 512 don't draw the line in question)
             int x1, x2;
             x1 = Location.transform("x");
             x2 = endPoint.transform("x");
@@ -279,7 +268,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
         public VPoint Target;
-  
+        // Create camera
         public Camera()
         {
             Position = new VPoint(0, 0, 0);
@@ -292,7 +281,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Lowerleft = new VPoint(-1, -1, 1);
             Lowerright = new VPoint(1, -1, 1);
         }
-
         //To translate the camera
         public void moveCamera(VPoint direction)
         {
@@ -303,7 +291,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Lowerright += direction;
             Target += direction;
         }
-
         //Sets the horizontal direction of the virtual screen after the camera is rotated.
         private void setXDirection()
         {
@@ -323,7 +310,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
             XDirection = new VPoint(dX, 0, -Orientation.X * dX / Orientation.Z).Normalize();
         }
-
         //Sets the vertical direction of the virtual screen after the camera is rotated.
         private void setYDirection()
         {
@@ -331,7 +317,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             if (YDirection.Y > 0)
                 YDirection *= -1;
         }
-
         //To rotate the camera
         public void turnCamera(VPoint direction)
         {
@@ -344,7 +329,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Lowerleft = Target - XDirection + YDirection;
             Lowerright = Target + XDirection - YDirection;
         }
-
+        // Get a ray through given coordinates
         public Ray getRay(float x,float y)
         {
             x /= 256;
@@ -353,16 +338,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-        
         public void debug(Surface screen)
         {
             int x1, x2;
             x1 = Upperleft.transform("x");
             x2 = Upperright.transform("x");
             if (x1 <= 512 && x2 <= 512)
-            {
                 screen.Line(x1, Upperleft.transform("y"), x2, Upperright.transform("y"), 255255255);
-            }
         }
     }
    
@@ -372,7 +354,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         abstract public Ray normal(VPoint location);
         abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
-
+        // Reflect a ray
         public Ray Reflect(Ray ray, VPoint location)
         {
             VPoint d = ray.Direction;
@@ -381,13 +363,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
     }
 
-    // Radius2 = Radius^2, Location = centre of the sphere
     class Sphere : Primitive
     {
+        // Radius2 = Radius^2, Location = centre of the sphere
         public VPoint Location;
         public float  Radius;
         public float  Radius2;
-
+        // Create sphere
         public Sphere(VPoint location, float radius, Material mat)
         {
             Mat = mat;
@@ -400,30 +382,27 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             float newradius = (float)Math.Sqrt(Radius2 - Location.Y);
             VPoint middle = Location;
             middle.Y = 0;
-            VPoint previousTekenpunt = new VPoint(0, 0, 1);
-            previousTekenpunt = previousTekenpunt.Normalize()*Radius;
-            previousTekenpunt += middle;
-
+            VPoint previousDrawPoint = new VPoint(0, 0, 1);
+            previousDrawPoint = previousDrawPoint.Normalize()*Radius;
+            previousDrawPoint += middle;
             for(int i = 1; i<121; i++)
             {
-                VPoint tekenpunt = new VPoint(Game.sinTable[(i * 3) % 360], 0, Game.sinTable[(i * 3 + 90) % 360]);
-                tekenpunt = tekenpunt.Normalize()*Radius;
-                tekenpunt += middle;
-
+                VPoint DrawPoint = new VPoint(Game.SinTable[(i * 3) % 360], 0, Game.SinTable[(i * 3 + 90) % 360]);
+                DrawPoint = DrawPoint.Normalize()*Radius;
+                DrawPoint += middle;
                 int x1, x2;
-                x1 = tekenpunt.transform("x");
-                x2 = previousTekenpunt.transform("x");
+                x1 = DrawPoint.transform("x");
+                x2 = previousDrawPoint.transform("x");
                 if (x1 <= 512 && x2 <= 512)
-                {
-                    screen.Line(x1, tekenpunt.transform("y"), x2, previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0, 0, 0)).getColor());
-                }
-                previousTekenpunt = tekenpunt;
+                    screen.Line(x1, DrawPoint.transform("y"), x2, previousDrawPoint.transform("y"), Mat.GetColor(new VPoint(0, 0, 0)).getColor());
+                previousDrawPoint = DrawPoint;
             }
 
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
+            // If the ray starts inside of the sphere
             if ((Location - ray.Location).Length < Radius-0.001f)
             {
                 float a = ray.Direction*ray.Direction;
@@ -434,6 +413,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 float distance = Math.Max( (-b+d)/(2*a) , (-b-d)/(2*a));
                 return distance;
             }
+            // Otherwise the ray starts outside of the sphere
             else
             {
                 VPoint c = Location - ray.Location;
@@ -445,8 +425,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 return t;
             }
         }
-        public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
-                                                    //dedichtstbijzijnde intersectie buiten hebben. J.
+        // Normal on the sphere given the location of the intersection
+        public override Ray normal(VPoint location)
         {
             return new Ray(location, (location - Location).Normalize());
         }        
@@ -457,19 +437,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Normal;
         public float  Distance;
-
+        // Create the plane
         public Plane(VPoint normal, float distance, Material mat)
         {
             Mat = mat;
             Normal = normal.Normalize();
             Distance = distance;
         }
-
+        // Serves no purpose, but has to be included because it is a primitive
         public override void debug(Surface screen)
         {
-            //hier doen we voorlopig niks  omdat het niet zinnig is.
         }
-
+        // Ray - Plane intersection
         override public float Intersect(Ray ray)
         {
             if (Normal * ray.Direction == 0)
@@ -477,20 +456,19 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             else
                 return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.Length);
         }
-
+        // Since the plane is defined by its normal and distance to the origin, we simply return the normal as a ray
         public override Ray normal(VPoint location)
         {
             return new Ray(location, Normal);
         }
-
     }
 
-    // Location = location of the light source, Red, Green and Blue determine the light intensity
     class Light
     {
+        // Location = location of the light source, Red, Green and Blue determine the light intensity
         public VPoint Location;
         public float  Red, Green, Blue;
-        
+        // Create a light source
         public Light(VPoint location, float r, float g, float b)
         {
             Location = location;
@@ -498,26 +476,26 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Green = g;
             Blue = b;
         }
-
+        // Determine the reflected color
         public VPoint reflectedColor(VPoint colorOfObject, float intensity)
         {
             return new VPoint((int)(colorOfObject.X * intensity*Red),(int)( colorOfObject.Y * intensity*Green), (int)(colorOfObject.Z * intensity*Blue));
         }
     }
 
-    // A scene is a list of lights and primitives
-    // The intersection methods checks for each ray whether it intersects with a primitive
     class Scene
     {
+        // A scene is a list of lights and primitives
+        // The intersection methods checks for each ray whether it intersects with a primitive
         public Light[]     Lights;
         public Primitive[] Primitives;
-
+        // Create the scene
         public Scene(Light[] lights, Primitive[] primitives)
         {
             this.Lights = lights;
             this.Primitives = primitives;
         }
-
+        // Check for intersections
         public Intersection intersect(Ray ray)
         {
             Primitive Hit = null;
@@ -537,12 +515,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     class Intersection
     {
+        // An intersection is determined by the ray that intersects at a location with a certain primitive
         public Ray       Ray, secondaryRay;
-        public Ray[] shadowRays;
+        public Ray[]     ShadowRays;
         public VPoint    Location;
         public Primitive ThingWeIntersectedWith;
         public float     Distance;
-
+        // Create an intersection
         public Intersection(Ray ray,  VPoint location, Primitive p)
         {
             Distance = (location - ray.Location).Length;
@@ -550,32 +529,31 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Location = location;
             ThingWeIntersectedWith = p;
         }
-
+        // Determine the colors on the scene
         public VPoint color(Scene scene)
         {
             if (ThingWeIntersectedWith != null)
             {
-                shadowRays = new Ray[scene.Lights.Length];
+                ShadowRays = new Ray[scene.Lights.Length];
                 VPoint diffusion = new VPoint();
                 for(int i = 0; i < scene.Lights.Length; i++)
                 {
                     Light light = scene.Lights[i];
                     VPoint shadowRayDirection = (light.Location - Location);
-                    shadowRays[i] = new Ray(Location + 0.00001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
-                    shadowRays[i].Distance = shadowRayDirection.Length;
-                    float distance = scene.intersect(shadowRays[i]).Distance;
+                    ShadowRays[i] = new Ray(Location + 0.00001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
+                    ShadowRays[i].Distance = shadowRayDirection.Length;
+                    float distance = scene.intersect(ShadowRays[i]).Distance;
                     if (distance >= shadowRayDirection.Length - 2 * 0.00001)
                     {
-                        shadowRays[i].Distance = distance;
+                        ShadowRays[i].Distance = distance;
                         VPoint j = ThingWeIntersectedWith.normal(Location).Direction;
                         if (j * Ray.Direction > 0)
                             j *= -1;
-                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * shadowRays[i].Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
+                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * ShadowRays[i].Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
-
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < Game.Recursion)
                 {
                     secondaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
                     secondaryRay.recursion = Ray.recursion + 1;
@@ -595,30 +573,37 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public void debug(Surface screen) 
         {
             Ray.debug(screen, Location, 0);
-            Ray j = ThingWeIntersectedWith.normal(Location);
-            if (j.Direction * Ray.Direction > 0)
-                j.Direction = j.Direction * -1;
-            j.debug(screen, 1, 2);
-            foreach (Ray shadowRay in shadowRays)
-                shadowRay.debug(screen, shadowRay.Distance, 4);
-            if (ThingWeIntersectedWith.Mat.Reflects > 0)
+            if (ThingWeIntersectedWith != null)
+            {
+                Ray j = ThingWeIntersectedWith.normal(Location);
+                if (j.Direction * Ray.Direction > 0)
+                    j.Direction = j.Direction * -1;
+                j.debug(screen, 1, 2);
+            }
+            if (ShadowRays != null)
+            {
+                foreach (Ray shadowRay in ShadowRays)
+                    shadowRay.debug(screen, shadowRay.Distance, 4);
+            }
+            if (ThingWeIntersectedWith != null && ThingWeIntersectedWith.Mat.Reflects > 0)
                 secondaryRay.debug(screen, secondaryRay.Distance, 1);
         }
     }
 
     class Raytracer
     {
+        // The raytracer is a combination of the scene to be traced, the camera and the screen
         public Scene   Scene;
         public Camera  Camera;
         public Surface Screen;
-
+        // Create the raytracer
         public Raytracer(Scene scene, Surface screen)
         {
             Scene = scene;
             Screen = screen;
             Camera = new Camera();
         }
-        
+        // Render the scene
         public void Render(bool debugging)
         {
             Ray ray;
@@ -632,7 +617,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene).getColor();
                     if (debugging && y == 256 && x % 50 == 0)
                     {
-                        if (intersection.ThingWeIntersectedWith != Scene.Primitives[0])
+                        if (intersection.ThingWeIntersectedWith != Scene.Primitives[4])
                             intersection.debug(Screen);
                         else
                             ray.debug(Screen, 7, 3);
