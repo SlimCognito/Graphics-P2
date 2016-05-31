@@ -20,11 +20,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[1] = new Light(new VPoint(2, 10, 5), 2, 2, 2);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[5];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
+            primitives[4] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
-            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f,2));
+            primitives[0] = new Sphere(new VPoint(0, 0, 1), 10, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -42,17 +42,29 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    public void Tick()
 	    {
 		    Screen.Clear( 0 );
-		    Screen.Print( "Gay Tracer", 2, 2, 0xffffff );
+		    Screen.Print( "Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
 
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.W])
+            {
+                Debugging = false;
                 Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.YDirection);
+            }
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.A])
+            {
+                Debugging = false;
                 Tracer.Camera.turnCamera(-0.1f * Tracer.Camera.XDirection);
+            }
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.S])
-                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.YDirection);
+            {
+                    Debugging = false;
+                    Tracer.Camera.turnCamera(0.1f * Tracer.Camera.YDirection);
+            }
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.D])
-                Tracer.Camera.turnCamera(0.1f * Tracer.Camera.XDirection);
+            {
+                        Debugging = false;
+                        Tracer.Camera.turnCamera(0.1f * Tracer.Camera.XDirection);
+            }
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.Enter])
                 Tracer.Camera.moveCamera(-0.1f * Tracer.Camera.YDirection);
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.LShift])
@@ -136,7 +148,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
         }
 
-        // Used in debugging window, Y = 0 so doesn't have to be transformed.
+        // Used in debugging window, if the string != "x" it transforms to the Y-coordinate on your screen.
         public int transform(string coordinate)
         {
             if (coordinate == "x")
@@ -220,19 +232,38 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Distance = float.PositiveInfinity;
             recursion = 0;
         }
-        public void debug(Surface screen, VPoint endPoint)
+        public void debug(Surface screen, VPoint endPoint, int type)
         {
+            int color = 0;
+            switch (type)
+            {
+                case 0:
+                    color = 0xFF0000;
+                    break;
+                case 1:
+                    color = 0x00FF00;
+                    break;
+                case 2:
+                    color = 0x0000FF;
+                    break;
+                case 3:
+                    color = 0xFFFFFF;
+                    break;
+                case 4:
+                    color = 0x888800;
+                    break;
+            }
             int x1, x2;
             x1 = Location.transform("x");
             x2 = endPoint.transform("x");
             if (x1 <= 512 && x2 <= 512)
             {
-                screen.Line(x1, Location.transform("y"), x2, endPoint.transform("y"), 0xFF0000);
+                screen.Line(x1, Location.transform("y"), x2, endPoint.transform("y"), color);
             }
         }
-        public void debug(Surface screen, float length)
+        public void debug(Surface screen, float length, int type)
         {
-            debug(screen, Location + Direction * length);
+            debug(screen, Location + Direction * length, type);
         }
     }
 
@@ -262,6 +293,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Lowerright = new VPoint(1, -1, 1);
         }
 
+        //To translate the camera
         public void moveCamera(VPoint direction)
         {
             Position += direction;
@@ -272,6 +304,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Target += direction;
         }
 
+        //Sets the horizontal direction of the virtual screen after the camera is rotated.
         private void setXDirection()
         {
             float dX;
@@ -289,9 +322,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 return;
             }
             XDirection = new VPoint(dX, 0, -Orientation.X * dX / Orientation.Z).Normalize();
-
-            
         }
+
+        //Sets the vertical direction of the virtual screen after the camera is rotated.
         private void setYDirection()
         {
             YDirection = XDirection % Orientation;
@@ -299,6 +332,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 YDirection *= -1;
         }
 
+        //To rotate the camera
         public void turnCamera(VPoint direction)
         {
             Orientation = (Orientation + direction).Normalize();
@@ -319,15 +353,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-
-        public void Update()
-        {
-            /*Upperleft = Upperleft;
-            Upperright = Upperright;
-            Lowerleft = Lowerleft;
-            Lowerright = Lowerright;*/
-        }
-
+        
         public void debug(Surface screen)
         {
             int x1, x2;
@@ -511,7 +537,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     class Intersection
     {
-        public Ray       Ray;
+        public Ray       Ray, secondaryRay;
+        public Ray[] shadowRays;
         public VPoint    Location;
         public Primitive ThingWeIntersectedWith;
         public float     Distance;
@@ -528,28 +555,35 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             if (ThingWeIntersectedWith != null)
             {
+                shadowRays = new Ray[scene.Lights.Length];
                 VPoint diffusion = new VPoint();
-                foreach (Light light in scene.Lights)
+                for(int i = 0; i < scene.Lights.Length; i++)
                 {
+                    Light light = scene.Lights[i];
                     VPoint shadowRayDirection = (light.Location - Location);
-                    Ray shadowRay = new Ray(Location + 0.00001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
-                    float distance = scene.intersect(shadowRay).Distance;
+                    shadowRays[i] = new Ray(Location + 0.00001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
+                    shadowRays[i].Distance = shadowRayDirection.Length;
+                    float distance = scene.intersect(shadowRays[i]).Distance;
                     if (distance >= shadowRayDirection.Length - 2 * 0.00001)
                     {
+                        shadowRays[i].Distance = distance;
                         VPoint j = ThingWeIntersectedWith.normal(Location).Direction;
                         if (j * Ray.Direction > 0)
-                            j = j*-1;
-                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
+                            j *= -1;
+                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * shadowRays[i].Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
+
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 1)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
                 {
-                    Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
-                    primaryRay.recursion = Ray.recursion + 1;
-
-                    Intersection inter = scene.intersect(primaryRay);
-                    VPoint smth = inter.color(scene);
+                    secondaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
+                    secondaryRay.recursion = Ray.recursion + 1;
+                    Intersection inter = scene.intersect(secondaryRay);
+                    if (inter.ThingWeIntersectedWith == scene.Primitives[0])
+                        secondaryRay.Distance = 3;
+                    else
+                        secondaryRay.Distance = inter.Distance;
                     return VPoint.colorStuff(inter.color(scene), diffusion, ThingWeIntersectedWith.Mat.Reflects);
                 }
                 else
@@ -560,16 +594,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public void debug(Surface screen) 
         {
-            Ray.debug(screen, Location);
+            Ray.debug(screen, Location, 0);
             Ray j = ThingWeIntersectedWith.normal(Location);
             if (j.Direction * Ray.Direction > 0)
                 j.Direction = j.Direction * -1;
-            if(ThingWeIntersectedWith != null)
-                j.debug(screen, 1); 
-            else
-            {
-
-            }
+            j.debug(screen, 1, 2);
+            foreach (Ray shadowRay in shadowRays)
+                shadowRay.debug(screen, shadowRay.Distance, 4);
+            if (ThingWeIntersectedWith.Mat.Reflects > 0)
+                secondaryRay.debug(screen, secondaryRay.Distance, 1);
         }
     }
 
@@ -597,12 +630,12 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     Intersection intersection = Scene.intersect(ray);
 
                     Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene).getColor();
-                    if (debugging && y == 256 && x % 20 == 0)
+                    if (debugging && y == 256 && x % 50 == 0)
                     {
-                        if (intersection.ThingWeIntersectedWith != null)
+                        if (intersection.ThingWeIntersectedWith != Scene.Primitives[0])
                             intersection.debug(Screen);
                         else
-                            ray.debug(Screen, 7);//smth
+                            ray.debug(Screen, 7, 3);//smth
                     }
                 }
                 if (debugging)
