@@ -170,7 +170,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         public void debug(Surface screen, VPoint endPoint)
         {
-            screen.Line(Location.transform("x"), Location.transform("y"), endPoint.transform("x"), endPoint.transform("y"), 0xFF0000);
+            int x1, x2;
+            x1 = Location.transform("x");
+            x2 = endPoint.transform("x");
+            if (x1 <= 512 && x2 <= 512)
+            {
+                screen.Line(x1, Location.transform("y"), x2, endPoint.transform("y"), 0xFF0000);
+            }
         }
         public void debug(Surface screen, float length)
         {
@@ -231,7 +237,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public void turnCamera(VPoint direction)
         {
             Orientation = (Target + direction - Position).Normalize();
-            Target = Position + Orientation;
             setXDirection();
             setYDirection();
             Upperleft = Target - XDirection - YDirection;
@@ -248,10 +253,24 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-        
+
+        public void Update()
+        {
+            /*Upperleft = Upperleft;
+            Upperright = Upperright;
+            Lowerleft = Lowerleft;
+            Lowerright = Lowerright;*/
+        }
+
         public void debug(Surface screen)
         {
-            screen.Line(Upperleft.transform("x"), Upperleft.transform("y"), Upperright.transform("x"), Upperright.transform("y"), 255255255);
+            int x1, x2;
+            x1 = Upperleft.transform("x");
+            x2 = Upperright.transform("x");
+            if (x1 <= 512 && x2 <= 512)
+            {
+                screen.Line(x1, Upperleft.transform("y"), x2, Upperright.transform("y"), 255255255);
+            }
         }
     }
    
@@ -295,12 +314,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
             for(double i = 1; i<121; i++)
             {
-               double pii = i / 60 * Math.PI;
-               VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
-               tekenpunt = tekenpunt.Normalize()*Radius;
-               tekenpunt += middle;
-               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)).getColor());
-               previousTekenpunt = tekenpunt;
+                double pii = i / 60 * Math.PI;
+                VPoint tekenpunt = new VPoint((float)Math.Sin(pii), 0, (float)Math.Cos(pii));
+                tekenpunt = tekenpunt.Normalize()*Radius;
+                tekenpunt += middle;
+                int x1, x2;
+                x1 = tekenpunt.transform("x");
+                x2 = previousTekenpunt.transform("x");
+                if (x1 <= 512 && x2 <= 512)
+                {
+                    screen.Line(x1, tekenpunt.transform("y"), x2, previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0, 0, 0)).getColor());
+                }
+                previousTekenpunt = tekenpunt;
             }
 
         }

@@ -10,3 +10,4 @@ Materials used to implement the ray tracer
   Ray - Sphere intersection
   Normal on sphere
   Reflection on sphere and plane
+ Space.jpg is a random picture from the web
