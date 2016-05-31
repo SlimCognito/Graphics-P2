@@ -54,7 +54,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         // Create material
         public Material()
         {
-            texture = true;
+            texture = false;
             Reflects = 0;
         }
         // Create reflective material
@@ -138,7 +138,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             int lekkah = (int)(X * 256 * 256 + Y * 256 + Z);
             string lekkahlekkah = lekkah.ToString("X");
-            int seeme = Convert.ToInt32(lekkahlekkah, 16);
             return Convert.ToInt32(lekkahlekkah, 16);
         }
     }
