@@ -113,6 +113,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return (a.X * b.X + a.Y * b.Y + a.Z * b.Z);
         }
+        // Crossproduct
+        public static VPoint operator %(VPoint a, VPoint b)
+        {
+            return new VPoint((a.Y * b.Z) - (a.Z * b.Y), (a.Z * b.X) - (a.X * b.Z), (a.X * b.Y) - (a.Y * b.X));
+        }
         // Multiplication with scalar
         public static VPoint operator *(VPoint a, float l)
         {
@@ -218,7 +223,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         private void setYDirection()
         {
-            YDirection = XDirection**Orientation;
+            YDirection = XDirection % Orientation;
             if (YDirection.Y < 0)
                 YDirection *= 1;
         }
@@ -438,7 +443,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 15)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
                 {
                     Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
                     primaryRay.recursion = Ray.recursion + 1;
