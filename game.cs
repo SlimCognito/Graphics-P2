@@ -290,7 +290,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
-        override public float Intersect(Ray ray) 
+        public override float Intersect(Ray ray) 
         {
             VPoint c = Location - ray.Location;
             float t = c * ray.Direction;
@@ -305,6 +305,12 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return new Ray(location, (location - Location).Normalize());
         }
+        public Ray Reflect(Ray ray, VPoint location)
+        {
+            Ray norm = normal(location);
+            return new Ray(norm.Location, 2 * (norm.Direction * ray.Direction) * norm.Direction - ray.Direction);
+        }
+
     }
 
     // Plane is determined by normal and distance to the origin.
