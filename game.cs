@@ -14,13 +14,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    {
             // Add light(s)
             Light[] lights = new Light[1];
-            lights[0] = new Light(new VPoint(0, 2, 0), 1, 1, 1);
+            lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -3, new Material());
-            primitives[1] = new Sphere(new VPoint(0, 0, -1), 1, new Material(new VPoint(255, 0, 0), 0));
-            primitives[2] = new Sphere(new VPoint(-3, 0, -1), 1, new Material(new VPoint(0, 255, 0), 0));
-            primitives[3] = new Sphere(new VPoint(3, 0, -1), 1, new Material(new VPoint(0, 0, 255), 0));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(new VPoint(255, 0, 0), 0));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(new VPoint(0, 255, 0), 0));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(new VPoint(0, 0, 255), 0));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -54,7 +54,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         // Create material
         public Material()
         {
-            texture = false;
+            texture = true;
             Reflects = 0;
         }
         // Create reflective material
@@ -417,11 +417,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 foreach (Light light in scene.Lights)
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
-                    Ray shadowRay = new Ray(Location + 0.00000001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
+                    Ray shadowRay = new Ray(Location + 0.00001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
                     float distance = scene.intersect(shadowRay).Distance;
-                    if (distance >= shadowRayDirection.Length - 2 * 0.00000001)
+                    if (distance >= shadowRayDirection.Length - 2 * 0.00001)
                     {
-                        result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 40*ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
+                        result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
                 }
                 return new VPoint(Math.Min(result.X, 255), Math.Min(result.Y, 255), Math.Min(result.Z, 255)).getColor();
