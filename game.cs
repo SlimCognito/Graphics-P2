@@ -17,10 +17,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(0, 2, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(new VPoint(255, 0, 0), 0));
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(new VPoint(0, 255, 0), 0));
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(new VPoint(0, 0, 255), 0));
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -3, new Material());
+            primitives[1] = new Sphere(new VPoint(0, 0, -1), 1, new Material(new VPoint(255, 0, 0), 0));
+            primitives[2] = new Sphere(new VPoint(-3, 0, -1), 1, new Material(new VPoint(0, 255, 0), 0));
+            primitives[3] = new Sphere(new VPoint(3, 0, -1), 1, new Material(new VPoint(0, 0, 255), 0));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -62,6 +62,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Color = c;
             Reflects = r;
+            texture = false;
         }
     }
 
@@ -419,9 +420,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     VPoint shadowRayDirection = (light.Location - Location);
                     Ray shadowRay = new Ray(Location + 0.00000001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
                     float distance = scene.intersect(shadowRay).Distance;
-                    if (distance >= (light.Location - Location).Length - 2 * 0.00000001)
+                    if (distance >= shadowRayDirection.Length - 2 * 0.00000001)
                     {
-                        result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)));
+                        result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 40*ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
                 }
                 return new VPoint(Math.Min(result.X, 255), Math.Min(result.Y, 255), Math.Min(result.Z, 255)).getColor();
