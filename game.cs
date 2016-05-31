@@ -148,12 +148,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint Location;
         public VPoint Direction;
         public float  Distance;
+        public int recursion;
 
         public Ray(VPoint Locationinit, VPoint Directioninit)
         {
             Location = Locationinit;
             Direction = Directioninit.Normalize();
             Distance = float.PositiveInfinity;
+            recursion = 0;
         }
         public void debug(Surface screen, VPoint endPoint)
         {
@@ -410,7 +412,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             ThingWeIntersectedWith = p;
         }
 
-        public int color(Scene scene)
+        public VPoint color(Scene scene)
         {
             if (ThingWeIntersectedWith != null)
             {
@@ -426,15 +428,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 5)
                 {
-                    VPoint reflection = new VPoint();
-                    Ray primaryRay = ThingWeIntersectedWith;
+                    Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
+                    primaryRay.recursion = Ray.recursion + 1;
+
+                    Intersection inter = scene.intersect(primaryRay);
+                    return inter.color(scene) * ThingWeIntersectedWith.Mat.Reflects + diffusion * (1 - ThingWeIntersectedWith.Mat.Reflects);
                 }
                 else
-                    return diffusion.getColor();
+                    return diffusion;
             }
-            return 0;
+            return new VPoint();
         }
 
         public void debug(Surface screen) 
@@ -472,7 +477,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     ray = Camera.getRay(x, y);
                     Intersection intersection = Scene.intersect(ray);
 
-                    Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene);
+                    Screen.pixels[x + Screen.width / 2 + y * Screen.width] = intersection.color(Scene).getColor();
                     if (debugging && y == 256 && x % 20 == 0)
                     {
                         if (intersection.ThingWeIntersectedWith != null)
