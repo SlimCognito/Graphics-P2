@@ -14,13 +14,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    {
             // Add light(s)
             Light[] lights = new Light[1];
-            lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
+            lights[0] = new Light(new VPoint(1, 1, 0), 1, 1, 1);
             // Add primitive(s)
-            Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(1f));
+            Primitive[] primitives = new Primitive[5];
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
+            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -307,13 +308,26 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
-            VPoint c = Location - ray.Location;
-            float t = c * ray.Direction;
-            VPoint q = c - t * ray.Direction;
-            float p = q * q;
-            if (p > Radius2) return -1;
-            t -= (float) Math.Sqrt(Radius2 - p);
-            return t;
+            if ((Location - ray.Location).Length < Radius-0.001f)
+            {
+                float a = ray.Direction*ray.Direction;
+                float b = ray.Direction * ( ray.Location -Location ) * 2;
+                float c = (ray.Location -Location)*(ray.Location - Location) - Radius2;
+                float d = b*b - 4*a*c;
+                d = (float)Math.Sqrt(d);
+                float distance = Math.Max( (-b+d)/(2*a) , (-b-d)/(2*a));
+                return distance;
+            }
+            else
+            {
+                VPoint c = Location - ray.Location;
+                float t = c * ray.Direction;
+                VPoint q = c - t * ray.Direction;
+                float p = q * q;
+                if (p > Radius2) return -1;
+                t -= (float)Math.Sqrt(Radius2 - p);
+                return t;
+            }
         }
         public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
@@ -432,7 +446,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     float distance = scene.intersect(shadowRay).Distance;
                     if (distance >= shadowRayDirection.Length - 2 * 0.00001)
                     {
-                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
+                        VPoint j = ThingWeIntersectedWith.normal(Location).Direction;
+                        if (j * Ray.Direction > 0)
+                            j = j*-1;
+                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
@@ -454,8 +471,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public void debug(Surface screen) 
         {
             Ray.debug(screen, Location);
+            Ray j = ThingWeIntersectedWith.normal(Location);
+            if (j.Direction * Ray.Direction > 0)
+                j.Direction = j.Direction * -1;
             if(ThingWeIntersectedWith != null)
-                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+                j.debug(screen, 1); 
             else
             {
 

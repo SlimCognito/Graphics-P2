@@ -12,3 +12,10 @@ C:\Users\David\Documents\GitHub\Graphics-P2\bin\Debug\OpenTK.dll
 C:\Users\David\Documents\GitHub\Graphics-P2\obj\Debug\template.csprojResolveAssemblyReference.cache
 C:\Users\David\Documents\GitHub\Graphics-P2\obj\Debug\template.exe
 C:\Users\David\Documents\GitHub\Graphics-P2\obj\Debug\template.pdb
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\bin\Debug\template.exe.config
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\obj\Debug\template.exe
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\obj\Debug\template.pdb
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\bin\Debug\template.exe
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\bin\Debug\template.pdb
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\bin\Debug\OpenTK.dll
+C:\Users\Joris\Documents\Visual Studio 2013\Projects\Graphics-P2\obj\Debug\template.csprojResolveAssemblyReference.cache
