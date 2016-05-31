@@ -340,9 +340,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Blue = b;
         }
 
-        public int reflectedColor(int colorOfObject, float intensity)
+        public VPoint reflectedColor(int colorOfObject, float intensity)
         {
-            return colorOfObject;
+            VPoint RGB = new VPoint(colorOfObject / (256 * 256), colorOfObject / (256) % 256, (colorOfObject % 256) % 256);
+            return RGB;
         }
     }
 
