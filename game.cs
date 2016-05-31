@@ -24,7 +24,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
-            primitives[0] = new Sphere(new VPoint(0, 0, 1), 10, new Material(0f,2));
+            primitives[0] = new Sphere(new VPoint(0, -5, 1), 10f, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -635,7 +635,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                         if (intersection.ThingWeIntersectedWith != Scene.Primitives[0])
                             intersection.debug(Screen);
                         else
-                            ray.debug(Screen, 7, 3);//smth
+                            ray.debug(Screen, 7, 3);
                     }
                 }
                 if (debugging)
