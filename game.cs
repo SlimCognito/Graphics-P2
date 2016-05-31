@@ -5,23 +5,27 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     class Game
     {
+        public bool      Debugging;
         public Raytracer Tracer;
-        bool Debugging;
-	    // member variables 
-	    public Surface Screen;
+	    public Surface   Screen;
+
 	    // initialize
 	    public void Init()
 	    {
+            // Add light(s)
             Light[] lights = new Light[1];
             lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
+            // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material(-1));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, true));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00,true));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF,true));
-            //voeg de primitives toe
+            // Create scene
             Scene scene = new Scene(lights, primitives);
+            // Create raytracer
             Tracer = new Raytracer(scene, Screen);
+            // Set debugging
             Debugging = true;
 	    }
 	    // tick: renders one frame
@@ -36,7 +40,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     public struct Material
     {
         public bool Reflects;
-        int Color;
+        public int  Color;
+
         public int GetColor(VPoint p)
         {
             if (Color > 0)
@@ -46,13 +51,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 return (((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) * 0xffffff;
             }
         }
-
+        // Create material
         public Material(int c)
         {
             Color = c;
             Reflects = false;
         }
-
+        // Create reflective material
         public Material(int c, bool r)
         {
             Color = c;
@@ -87,7 +92,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             }
             return 512 - (int)((Z + 2) * 51.2f);
         }
-
+        // 3D vector / point in 3D space
         public VPoint(float xinit, float yinit, float zinit)
         {
             X = xinit;
@@ -132,7 +137,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     {
         public VPoint Location;
         public VPoint Direction;
-        public float Distance;
+        public float  Distance;
+
         public Ray(VPoint Locationinit, VPoint Directioninit)
         {
             Location = Locationinit;
@@ -161,14 +167,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public VPoint XDirection;
         public VPoint YDirection;
         public VPoint Upperright, Lowerleft, Lowerright;
-        public VPoint target;
-        
-
+        public VPoint Target;
+  
         public Camera()
         {
             Position = new VPoint(0, 0, 0);
             Orientation = new VPoint(0, 0, 1);
-            target = Position + Orientation;
+            Target = Position + Orientation;
             Upperleft = new VPoint(-1, 1, 1);
             XDirection = new VPoint(1, 0, 0);
             YDirection = new VPoint(0, -1, 0);
@@ -184,13 +189,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Upperright += direction;
             Lowerleft += direction;
             Lowerright += direction;
-            target += direction;
+            Target += direction;
             setXDirection();
             setYDirection();
-            Upperleft = target - XDirection - YDirection;
-            Upperright = target + XDirection - YDirection;
-            Lowerleft = target - XDirection + YDirection;
-            Lowerright = target + XDirection - YDirection;
+            Upperleft = Target - XDirection - YDirection;
+            Upperright = Target + XDirection - YDirection;
+            Lowerleft = Target - XDirection + YDirection;
+            Lowerright = Target + XDirection - YDirection;
         }
 
         private void setXDirection()
@@ -204,11 +209,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public void turnCamera(VPoint direction)
         {
-            target = Position + Orientation;
-            target += direction;
-            Orientation = target - Position;
-            Orientation = Orientation.Normalize();
-            
+            Orientation = (Target + direction - Position).Normalize();
         }
 
         public Ray getRay(float x,float y)
@@ -297,25 +298,28 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     class Plane : Primitive
     {
         public VPoint Normal;
-        public float Distance;
+        public float  Distance;
+
         public Plane(VPoint normal, float distance, Material mat)
         {
             Mat = mat;
             Normal = normal;
             Distance = distance;
         }
+
         public override void debug(Surface screen)
         {
             //hier doen we voorlopig niks  omdat het niet zinnig is.
         }
+
         override public float Intersect(Ray ray)
         {
             if (Normal * ray.Direction == 0)
                 return -1;
             else
                 return (((Distance - ray.Location * Normal) / (Normal * ray.Direction)) * ray.Direction.Length);
-
         }
+
         public override Ray normal(VPoint location)
         {
             return new Ray(location, Normal);
@@ -346,7 +350,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     // The intersection methods checks for each ray whether it intersects with a primitive
     class Scene
     {
-        public Light[] Lights;
+        public Light[]     Lights;
         public Primitive[] Primitives;
 
         public Scene(Light[] lights, Primitive[] primitives)
@@ -378,14 +382,14 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Ray Ray;
         public VPoint Location;
         public Primitive ThingWeIntersectedWith;
-        public float distance;
+        public float Distance;
 
-        public Intersection(Ray ray,  VPoint Location, Primitive p)
+        public Intersection(Ray ray,  VPoint location, Primitive p)
         {
-            this.distance = (Location - ray.Location).Length;
-            this.Ray = ray;
-            this.Location = Location;
-            this.ThingWeIntersectedWith = p;
+            Distance = (location - ray.Location).Length;
+            Ray = ray;
+            Location = location;
+            ThingWeIntersectedWith = p;
         }
 
         public int color(Scene scene)
@@ -397,7 +401,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
                     Ray shadowRay = new Ray(Location + float.Epsilon * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
-                    float distance = scene.intersect(shadowRay).distance;
+                    float distance = scene.intersect(shadowRay).Distance;
                     if (distance < (light.Location - Location).Length - 2 * float.Epsilon)
                     {
                         result += ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)) * light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location));
@@ -422,15 +426,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     class Raytracer
     {
-        public Scene Scene;
-        public Camera Camera;
+        public Scene   Scene;
+        public Camera  Camera;
         public Surface Screen;
 
         public Raytracer(Scene scene, Surface screen)
         {
-            this.Scene = scene;
-            this.Screen = screen;
-            this.Camera = new Camera();
+            Scene = scene;
+            Screen = screen;
+            Camera = new Camera();
         }
         
         public void Render(bool debugging) // tijdelijk y standaard op 0 gezet voor EZ debugging J.
