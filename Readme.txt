@@ -17,3 +17,16 @@ Materials used to implement the ray tracer
 
 It should be noted that for ease with debugging the locations and sizes of the spheres have been fixed. When moving the camera
 the intersection points move as they should, the spheres themselves don't.
+Another thing to note is that the tracer is incredibly slow, moving the camera especially goes slow and requires you either constantly hitting
+or constantly pressing the button mapped to the movement you wanna make
+A: Turn left
+D: Turn right
+W: Turn up
+S: Turn down
+Enter: Move up
+LShift: Move down
+Up: Move forward
+Down: Move backwards
+Left: Move left
+Right: Move right
+Using Up and Down you can change the FOV
