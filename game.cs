@@ -130,6 +130,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return new VPoint(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
+
+        public int getColor()
+        {
+            return (int) (X * 256 * 256 + Y * 256 + Z);
+        }
     }
 
     // Location = ray origin, Direction = ray direction and Distance = ray length
@@ -397,18 +402,18 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             if (ThingWeIntersectedWith != null)
             {
-                float result = 0;
+                VPoint result = 0;
                 foreach (Light light in scene.Lights)
                 {
                     VPoint shadowRayDirection = (light.Location - Location);
                     Ray shadowRay = new Ray(Location + float.Epsilon * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
-                    int distance = scene.intersect(shadowRay).Distance;
+                    float distance = scene.intersect(shadowRay).Distance;
                     if (distance < (light.Location - Location).Length - 2 * float.Epsilon)
                     {
                         result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)));
                     }
                 }
-                return result;
+                return new VPoint(Math.Min(result.X, 255), Math.Min(result.Y, 255), Math.Min(result.Z, 255)).getColor();
             }
             return 0;
         }
@@ -438,7 +443,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             Camera = new Camera();
         }
         
-        public void Render(bool debugging) // tijdelijk y standaard op 0 gezet voor EZ debugging J.
+        public void Render(bool debugging)
         {
             Ray ray;
             for (int y = 0; y < Screen.height; y++)
