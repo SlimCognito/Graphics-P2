@@ -18,9 +18,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material(-1));
-            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, true));
-            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00,true));
-            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF,true));
+            primitives[1] = new Sphere(new VPoint(0, 0, 5), 1, new Material(0xFF0000, 0));
+            primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1, new Material(0x00FF00, 0));
+            primitives[3] = new Sphere(new VPoint(3, 0, 5), 1, new Material(0x0000FF, 0));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -39,8 +39,8 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
     public struct Material
     {
-        public bool Reflects;
-        public int  Color;
+        public float Reflects;
+        public int   Color;
 
         public int GetColor(VPoint p)
         {
@@ -55,10 +55,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Material(int c)
         {
             Color = c;
-            Reflects = false;
+            Reflects = 0;
         }
         // Create reflective material
-        public Material(int c, bool r)
+        public Material(int c, float r)
         {
             Color = c;
             Reflects = r;
