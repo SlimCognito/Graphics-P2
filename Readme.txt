@@ -29,4 +29,4 @@ Up: Move forward
 Down: Move backwards
 Left: Move left
 Right: Move right
-Using Up and Down you can change the FOV
+Using Up and Down you can change the FOV, which is implicitly set at 90 degrees
