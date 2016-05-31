@@ -14,7 +14,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    {
             // Add light(s)
             Light[] lights = new Light[1];
-            lights[0] = new Light(new VPoint(0, 0, 0), 1, 1, 1);
+            lights[0] = new Light(new VPoint(0, 2, 0), 1, 1, 1);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -5, new Material());
@@ -135,8 +135,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public int getColor()
         {
-            return 1 * 256 * 256 + 0 + 0;
-            //return (int) (X * 256 * 256 + Y * 256 + Z);
+            int lekkah = (int)(X * 256 * 256 + Y * 256 + Z);
+            string lekkahlekkah = lekkah.ToString("X");
+            int seeme = Convert.ToInt32(lekkahlekkah, 16);
+            return Convert.ToInt32(lekkahlekkah, 16);
         }
     }
 
@@ -358,7 +360,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public VPoint reflectedColor(VPoint colorOfObject, float intensity)
         {
-            return new VPoint(colorOfObject.X * intensity, colorOfObject.Y * intensity, colorOfObject.Z * intensity);
+            return new VPoint(colorOfObject.X * intensity*Red, colorOfObject.Y * intensity*Green, colorOfObject.Z * intensity*Blue);
         }
     }
 
