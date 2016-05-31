@@ -40,7 +40,7 @@ namespace Template {
             for (int i = 0; i < 360; i++)
                 SinTable[i] = (float)Math.Sin(i * Math.PI / 180);
             //load bitmap4space
-            string s = Path.Combine(Environment.CurrentDirectory, @"Data\", "Space.jpg");
+            string s = Path.Combine(Environment.CurrentDirectory, @"..\..\", "Space.jpg");
             Space = new Bitmap(s);
 	    }
 	    // tick: renders one frame
