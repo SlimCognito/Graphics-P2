@@ -14,8 +14,9 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 	    public void Init()
 	    {
             // Add light(s)
-            Light[] lights = new Light[1];
+            Light[] lights = new Light[2];
             lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
+            lights[1] = new Light(new VPoint(2, 10, 5), 2, 2, 2);
             // Add primitive(s)
             Primitive[] primitives = new Primitive[4];
             primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f));
@@ -199,8 +200,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         public void debug(Surface screen, float length)
         {
-            VPoint d = Direction.Normalize();
-            debug(screen, Location + d * length);
+            debug(screen, Location + Direction * length);
         }
     }
 
@@ -303,7 +303,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         public Ray Reflect(Ray ray, VPoint location)
         {
-            VPoint d = ray.Direction.Normalize();
+            VPoint d = ray.Direction;
             VPoint n = normal(location).Direction;
             return new Ray(location, (d - (2 * (d * n) * n)).Normalize());
         }
