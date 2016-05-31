@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Drawing;
 
 namespace Template {         //het huidige probleem lijkt zich te bevinden in de sphere intersect, de rays intersecten nooit, en dat zou volgens mij wel moeten gebeuren. J.
 
@@ -9,7 +10,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public Raytracer Tracer;
 	    public Surface   Screen;
         public static float[] sinTable;
-
+        public static Bitmap    Space;
 	    // initialize
 	    public void Init()
 	    {
@@ -18,11 +19,12 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             lights[0] = new Light(new VPoint(1, 2, 0), 1, 1, 1);
             lights[1] = new Light(new VPoint(2, 10, 5), 2, 2, 2);
             // Add primitive(s)
-            Primitive[] primitives = new Primitive[4];
-            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f));
+            Primitive[] primitives = new Primitive[5];
+            primitives[0] = new Plane(new VPoint(0, 1, 0), -2, new Material(0.5f,1));
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
+            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -32,12 +34,15 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             sinTable = new float[360];
             for (int i = 0; i < 360; i++)
                 sinTable[i] = (float)Math.Sin(i * Math.PI / 180);
+            //load bitmap4space
+            string s = Path.Combine(Environment.CurrentDirectory, @"Data\", "Space.jpg");
+            Space = new Bitmap(s);
 	    }
 	    // tick: renders one frame
 	    public void Tick()
 	    {
 		    Screen.Clear( 0 );
-		    Screen.Print( "Ray Tracer", 2, 2, 0xffffff );
+		    Screen.Print( "Gay Tracer", 2, 2, 0xffffff );
             Tracer.Render(Debugging);
 
             if (OpenTK.Input.Keyboard.GetState()[OpenTK.Input.Key.W])
@@ -66,21 +71,42 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
     public class Material
     {
         public VPoint Color;
-        public bool texture;
+        public int texture;
         public float Reflects;
         public VPoint GetColor(VPoint p)
         {
-            if (!texture)
-                return Color;
-            else
+
+            switch(texture)
             {
-                return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
+                case 0: return Color;
+                case 1: return new VPoint(231, 231, 231) * ((((Math.Abs((int)Math.Floor(p.X) + (int)Math.Floor(p.Z)))) % 2) + 0.1f);
+                case 2:
+                    {
+                        int x = Modulo((int)(p.X * 600)+3000,6000);
+                        int y = Modulo((int)(p.Z * 400)+1600,4000);
+                        Color Pixel = Game.Space.GetPixel(x, y);
+                        return new VPoint(Pixel.R, Pixel.G, Pixel.B);
+                    }
+                default: return Color;
             }
+
         }
-        // Create material
-        public Material(float r)
+        //better modulo
+        int Modulo(int i, int y)
         {
-            texture = true;
+            if ((i / y) % 2 == 1)
+                i = -i;
+            while (i < 0)
+                i += y;
+            while (i >= y)
+                i -= y;
+            return i;
+        }
+
+        // Create material
+        public Material(float r, int t)
+        {
+            texture = t;
             Reflects = r;
         }
         // Create reflective material
@@ -88,7 +114,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             Color = c;
             Reflects = r;
-            texture = false;
+            texture = 0;
         }
     }
 
@@ -196,7 +222,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         }
         public void debug(Surface screen, VPoint endPoint)
         {
-            screen.Line(Location.transform("x"), Location.transform("y"), endPoint.transform("x"), endPoint.transform("y"), 0xFF0000);
+            int x1, x2;
+            x1 = Location.transform("x");
+            x2 = endPoint.transform("x");
+            if (x1 <= 512 && x2 <= 512)
+            {
+                screen.Line(x1, Location.transform("y"), x2, endPoint.transform("y"), 0xFF0000);
+            }
         }
         public void debug(Surface screen, float length)
         {
@@ -287,10 +319,24 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             positionOnScreen += x * XDirection + y * YDirection;
             return new Ray(Position, (positionOnScreen - Position).Normalize());
         }
-        
+
+        public void Update()
+        {
+            /*Upperleft = Upperleft;
+            Upperright = Upperright;
+            Lowerleft = Lowerleft;
+            Lowerright = Lowerright;*/
+        }
+
         public void debug(Surface screen)
         {
-            screen.Line(Upperleft.transform("x"), Upperleft.transform("y"), Upperright.transform("x"), Upperright.transform("y"), 255255255);
+            int x1, x2;
+            x1 = Upperleft.transform("x");
+            x2 = Upperright.transform("x");
+            if (x1 <= 512 && x2 <= 512)
+            {
+                screen.Line(x1, Upperleft.transform("y"), x2, Upperright.transform("y"), 255255255);
+            }
         }
     }
    
@@ -334,24 +380,44 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
             for(int i = 1; i<121; i++)
             {
-               VPoint tekenpunt = new VPoint(Game.sinTable[(i * 3) % 360], 0, Game.sinTable[(i * 3 + 90) % 360]);
-               tekenpunt = tekenpunt.Normalize()*Radius;
-               tekenpunt += middle;
-               screen.Line(tekenpunt.transform("x"), tekenpunt.transform("y"), previousTekenpunt.transform("x"), previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0,0,0)).getColor());
-               previousTekenpunt = tekenpunt;
+                VPoint tekenpunt = new VPoint(Game.sinTable[(i * 3) % 360], 0, Game.sinTable[(i * 3 + 90) % 360]);
+                tekenpunt = tekenpunt.Normalize()*Radius;
+                tekenpunt += middle;
+
+                int x1, x2;
+                x1 = tekenpunt.transform("x");
+                x2 = previousTekenpunt.transform("x");
+                if (x1 <= 512 && x2 <= 512)
+                {
+                    screen.Line(x1, tekenpunt.transform("y"), x2, previousTekenpunt.transform("y"), Mat.GetColor(new VPoint(0, 0, 0)).getColor());
+                }
+                previousTekenpunt = tekenpunt;
             }
 
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
         override public float Intersect(Ray ray) 
         {
-            VPoint c = Location - ray.Location;
-            float t = c * ray.Direction;
-            VPoint q = c - t * ray.Direction;
-            float p = q * q;
-            if (p > Radius2) return -1;
-            t -= (float) Math.Sqrt(Radius2 - p);
-            return t;
+            if ((Location - ray.Location).Length < Radius-0.001f)
+            {
+                float a = ray.Direction*ray.Direction;
+                float b = ray.Direction * ( ray.Location -Location ) * 2;
+                float c = (ray.Location -Location)*(ray.Location - Location) - Radius2;
+                float d = b*b - 4*a*c;
+                d = (float)Math.Sqrt(d);
+                float distance = Math.Max( (-b+d)/(2*a) , (-b-d)/(2*a));
+                return distance;
+            }
+            else
+            {
+                VPoint c = Location - ray.Location;
+                float t = c * ray.Direction;
+                VPoint q = c - t * ray.Direction;
+                float p = q * q;
+                if (p > Radius2) return -1;
+                t -= (float)Math.Sqrt(Radius2 - p);
+                return t;
+            }
         }
         public override Ray normal(VPoint location) //Misschien aanpassen zodat we weten van binnen of van buiten -voorlopig niet zinnig omdat we maar vanuit een punt kijken en 
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
@@ -470,7 +536,10 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     float distance = scene.intersect(shadowRay).Distance;
                     if (distance >= shadowRayDirection.Length - 2 * 0.00001)
                     {
-                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
+                        VPoint j = ThingWeIntersectedWith.normal(Location).Direction;
+                        if (j * Ray.Direction > 0)
+                            j = j*-1;
+                        diffusion += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), 60*Math.Max(0, j * shadowRay.Direction.Normalize()) * (1 / (shadowRayDirection.Length * shadowRayDirection.Length)));
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
@@ -492,8 +561,11 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         public void debug(Surface screen) 
         {
             Ray.debug(screen, Location);
+            Ray j = ThingWeIntersectedWith.normal(Location);
+            if (j.Direction * Ray.Direction > 0)
+                j.Direction = j.Direction * -1;
             if(ThingWeIntersectedWith != null)
-                ThingWeIntersectedWith.normal(Location).debug(screen, 1); 
+                j.debug(screen, 1); 
             else
             {
 
