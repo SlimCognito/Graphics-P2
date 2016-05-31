@@ -251,6 +251,13 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         abstract public Ray normal(VPoint location);
         abstract public void debug(Surface screen);
         abstract public float Intersect(Ray ray); // Misschien naar abstract public void Intersect en de intersection opslaan in class Intersect?
+
+        public Ray Reflect(Ray ray, VPoint location)
+        {
+            VPoint d = ray.Direction.Normalize();
+            VPoint n = normal(location).Direction;
+            return new Ray(location, d - (2 * (d * n) * n));
+        }
     }
 
     // Radius2 = Radius^2, Location = centre of the sphere
@@ -302,14 +309,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                                                     //dedichtstbijzijnde intersectie buiten hebben. J.
         {
             return new Ray(location, (location - Location).Normalize());
-        }
-        public Ray Reflect(Ray ray, VPoint location)
-        {
-            VPoint d = ray.Direction.Normalize();
-            VPoint n = normal(location).Direction;
-            return new Ray(location, d - (2 * (d * n) * n));
-        }
-        
+        }        
     }
 
     // Plane is determined by normal and distance to the origin.
@@ -342,6 +342,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return new Ray(location, Normal);
         }
+
     }
 
     // Location = location of the light source, Red, Green and Blue determine the light intensity
