@@ -24,7 +24,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
             primitives[1] = new Sphere(new VPoint(0, 0, 5), 1.5f, new Material(new VPoint(255, 50, 100), 0.5f));
             primitives[2] = new Sphere(new VPoint(-3, 0, 5), 1.5f, new Material(new VPoint(0, 255, 10), 0.5f));
             primitives[3] = new Sphere(new VPoint(3, 0, 5), 1.5f, new Material(new VPoint(255, 255, 255), 0.75f));
-            primitives[4] = new Sphere(new VPoint(0, 0, 1), 10f, new Material(0f,2));
+            primitives[4] = new Sphere(new VPoint(0, -5, 1), 10f, new Material(0f,2));
             // Create scene
             Scene scene = new Scene(lights, primitives);
             // Create raytracer
@@ -543,7 +543,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     }
                 }
                 diffusion = new VPoint(Math.Min(diffusion.X, 255), Math.Min(diffusion.Y, 255), Math.Min(diffusion.Z, 255));
-                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 1)
+                if (ThingWeIntersectedWith.Mat.Reflects != 0 && Ray.recursion < 3)
                 {
                     Ray primaryRay = ThingWeIntersectedWith.Reflect(Ray, Location);
                     primaryRay.recursion = Ray.recursion + 1;
