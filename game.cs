@@ -286,7 +286,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
 
         }
         // Intersects with a ray, returns the length at which the ray hits the sphere, -1 if no intersection
-        public override float Intersect(Ray ray) 
+        override public float Intersect(Ray ray) 
         {
             VPoint c = Location - ray.Location;
             float t = c * ray.Direction;
@@ -301,12 +301,6 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
         {
             return new Ray(location, (location - Location).Normalize());
         }
-        public Ray Reflect(Ray ray, VPoint location)
-        {
-            Ray norm = normal(location);
-            return new Ray(norm.Location, 2 * (norm.Direction * ray.Direction) * norm.Direction - ray.Direction);
-        }
-
     }
 
     // Plane is determined by normal and distance to the origin.
@@ -416,7 +410,7 @@ namespace Template {         //het huidige probleem lijkt zich te bevinden in de
                     VPoint shadowRayDirection = (light.Location - Location);
                     Ray shadowRay = new Ray(Location + 0.00000001f * shadowRayDirection.Normalize(), shadowRayDirection.Normalize());
                     float distance = scene.intersect(shadowRay).Distance;
-                    if (distance < (light.Location - Location).Length - 2 * 0.00000001)
+                    if (distance > (light.Location - Location).Length - 2 * 0.00000001)
                     {
                         result += light.reflectedColor(ThingWeIntersectedWith.Mat.GetColor(Location), ThingWeIntersectedWith.normal(Location).Direction * shadowRay.Direction.Normalize() * (1 / (distance * distance)));
                     }
